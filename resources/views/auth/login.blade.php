@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#075b43">
     <link rel="icon" href="{{ asset('images/favicon-simprotem.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('fonts/fontawesome/css/fontawesome-all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <style>
@@ -29,7 +32,10 @@
             min-height: 100vh;
             margin: 0;
             color: var(--ink);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 15px;
+            line-height: 1.55;
+            letter-spacing: -.01em;
             background:
                 radial-gradient(circle at 8% 12%, rgba(245, 173, 27, .16) 0 7rem, transparent 7.1rem),
                 radial-gradient(circle at 92% 88%, rgba(7, 91, 67, .12) 0 12rem, transparent 12.1rem),
@@ -117,7 +123,7 @@
         .brand-copy h2 {
             margin: 0 0 16px;
             color: #fff;
-            font-size: clamp(28px, 4vw, 42px);
+            font-size: clamp(28px, 4vw, 40px);
             font-weight: 700;
             line-height: 1.15;
         }
@@ -168,14 +174,14 @@
         .login-form h1 {
             margin: 0 0 10px;
             color: var(--brand-green-dark);
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 700;
         }
 
         .login-description {
             margin: 0 0 32px;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
         }
 
@@ -187,7 +193,7 @@
             display: block;
             margin-bottom: 8px;
             color: var(--ink);
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 600;
         }
 
@@ -210,7 +216,7 @@
             background: #fbfdfc;
             border: 1px solid var(--line);
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 14.5px;
             transition: border-color .2s, box-shadow .2s, background .2s;
         }
 
@@ -251,7 +257,7 @@
             border: 0;
             border-radius: 12px;
             box-shadow: 0 10px 24px rgba(7, 91, 67, .22);
-            font-size: 14px;
+            font-size: 14.5px;
             font-weight: 700;
             letter-spacing: .02em;
             cursor: pointer;
@@ -268,7 +274,7 @@
         .login-note {
             margin: 24px 0 0;
             color: #8a9b96;
-            font-size: 12px;
+            font-size: 12.5px;
             text-align: center;
         }
 
