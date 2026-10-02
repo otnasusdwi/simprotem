@@ -28,3 +28,277 @@ table.dataTable tbody td {
 label {
     margin-bottom: 1.5rem !important;
 }
+
+/* Simprotem global theme */
+:root {
+    --simprotem-green: #075b43;
+    --simprotem-green-dark: #043f30;
+    --simprotem-green-deep: #033529;
+    --simprotem-green-soft: #eaf5f1;
+    --simprotem-green-muted: #8eaaa1;
+    --simprotem-orange: #f5ad1b;
+    --simprotem-orange-dark: #d88900;
+    --simprotem-danger: #c83f49;
+    --simprotem-danger-dark: #a92f38;
+    --simprotem-line: #dce8e4;
+    --simprotem-ink: #17342c;
+}
+
+body {
+    color: var(--simprotem-ink);
+    background-color: #f4f8f6;
+}
+
+a {
+    color: var(--simprotem-green);
+}
+
+a:hover,
+a:focus {
+    color: var(--simprotem-green-dark);
+}
+
+/* Sidebar */
+.navbar-brand,
+.pcoded-navbar,
+.pcoded-navbar .header-logo {
+    background: var(--simprotem-green-dark);
+}
+
+.pcoded-navbar {
+    color: #bed0ca;
+    box-shadow: 1px 0 22px rgba(4, 63, 48, .24);
+}
+
+.pcoded-navbar a {
+    color: #bed0ca;
+}
+
+.pcoded-navbar .pcoded-menu-caption {
+    color: rgba(255, 255, 255, .7);
+}
+
+.pcoded-navbar .pcoded-inner-navbar li.active > a,
+.pcoded-navbar .pcoded-inner-navbar li:focus > a,
+.pcoded-navbar .pcoded-inner-navbar li:hover > a {
+    color: #fff;
+}
+
+.pcoded-navbar .pcoded-inner-navbar > li.active > a,
+.pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger > a {
+    background: rgba(255, 255, 255, .09);
+    color: #fff;
+}
+
+.pcoded-navbar .pcoded-inner-navbar > li.active::after,
+.pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger::after {
+    width: 4px;
+    background-color: var(--simprotem-orange);
+}
+
+.pcoded-navbar .pcoded-inner-navbar li .pcoded-submenu > li.active > a::before,
+.pcoded-navbar .pcoded-inner-navbar li .pcoded-submenu > li:focus > a::before,
+.pcoded-navbar .pcoded-inner-navbar li .pcoded-submenu > li:hover > a::before {
+    background: var(--simprotem-orange);
+}
+
+.pcoded-navbar .pcoded-submenu {
+    background: var(--simprotem-green-deep);
+}
+
+.pcoded-navbar .mobile-menu span,
+.pcoded-navbar .mobile-menu span::before,
+.pcoded-navbar .mobile-menu span::after {
+    background-color: #bed0ca;
+}
+
+/* Header and profile menu */
+.pcoded-header .input-group .input-group-text:hover,
+.pcoded-header a:hover,
+.pcoded-header dropdown-toggle:hover,
+.pcoded-header .dropdown.drp-user.show::before {
+    color: var(--simprotem-green);
+}
+
+.pcoded-header .dropdown .profile-notification .pro-head {
+    background: var(--simprotem-green);
+}
+
+.pcoded-header .dropdown .profile-notification .pro-body li.active,
+.pcoded-header .dropdown .profile-notification .pro-body li:active,
+.pcoded-header .dropdown .profile-notification .pro-body li:focus,
+.pcoded-header .dropdown .profile-notification .pro-body li:hover {
+    background: var(--simprotem-green-soft);
+}
+
+/* Primary actions */
+.theme-bg,
+.btn-primary,
+.btn-success,
+.btn-info {
+    color: #fff;
+    background: linear-gradient(135deg, var(--simprotem-green), var(--simprotem-green-dark));
+    border-color: var(--simprotem-green);
+}
+
+.theme-bg:hover,
+.theme-bg:focus,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-success:hover,
+.btn-success:focus,
+.btn-info:hover,
+.btn-info:focus,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-success:not(:disabled):not(.disabled):active,
+.btn-success:not(:disabled):not(.disabled).active,
+.btn-info:not(:disabled):not(.disabled):active,
+.btn-info:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle,
+.show > .btn-success.dropdown-toggle,
+.show > .btn-info.dropdown-toggle {
+    color: #fff;
+    background: var(--simprotem-green-dark);
+    border-color: var(--simprotem-green-dark);
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled,
+.btn-success.disabled,
+.btn-success:disabled,
+.btn-info.disabled,
+.btn-info:disabled {
+    color: #fff;
+    background: var(--simprotem-green-muted);
+    border-color: var(--simprotem-green-muted);
+}
+
+/* Supporting and warning actions */
+.theme-bg2,
+.btn-warning {
+    color: #fff;
+    background: linear-gradient(135deg, var(--simprotem-orange), var(--simprotem-orange-dark));
+    border-color: var(--simprotem-orange);
+}
+
+.theme-bg2:hover,
+.theme-bg2:focus,
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:not(:disabled):not(.disabled):active,
+.btn-warning:not(:disabled):not(.disabled).active,
+.show > .btn-warning.dropdown-toggle {
+    color: #fff;
+    background: var(--simprotem-orange-dark);
+    border-color: var(--simprotem-orange-dark);
+}
+
+.btn-secondary {
+    color: var(--simprotem-green-dark);
+    background: var(--simprotem-green-soft);
+    border-color: #c8ddd6;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:not(:disabled):not(.disabled):active,
+.btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle {
+    color: #fff;
+    background: var(--simprotem-green);
+    border-color: var(--simprotem-green);
+}
+
+.btn-danger {
+    color: #fff;
+    background: var(--simprotem-danger);
+    border-color: var(--simprotem-danger);
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:not(:disabled):not(.disabled):active,
+.btn-danger:not(:disabled):not(.disabled).active,
+.show > .btn-danger.dropdown-toggle {
+    color: #fff;
+    background: var(--simprotem-danger-dark);
+    border-color: var(--simprotem-danger-dark);
+}
+
+.btn {
+    border-radius: 8px;
+    transition: color .2s, background-color .2s, border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:focus,
+.btn.focus {
+    box-shadow: 0 0 0 3px rgba(7, 91, 67, .14);
+}
+
+/* Forms, navigation, and data tables */
+.form-control,
+.custom-select {
+    border-color: var(--simprotem-line);
+    border-radius: 8px;
+}
+
+.form-control:focus,
+.custom-select:focus {
+    border-color: var(--simprotem-green);
+    box-shadow: 0 0 0 3px rgba(7, 91, 67, .1);
+}
+
+.page-item.active .page-link,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    color: #fff !important;
+    background: var(--simprotem-green) !important;
+    border-color: var(--simprotem-green) !important;
+}
+
+.page-link,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    color: var(--simprotem-green) !important;
+}
+
+.breadcrumb-item + .breadcrumb-item,
+.breadcrumb-item a,
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: var(--simprotem-green);
+}
+
+.badge-primary,
+.badge-success,
+.badge-info,
+.bg-primary,
+.bg-success,
+.bg-info {
+    color: #fff;
+    background-color: var(--simprotem-green) !important;
+}
+
+.badge-warning,
+.bg-warning {
+    color: var(--simprotem-green-dark);
+    background-color: var(--simprotem-orange) !important;
+}
+
+.card {
+    border-color: rgba(7, 91, 67, .08);
+    box-shadow: 0 8px 24px rgba(4, 63, 48, .06);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(7, 91, 67, .045);
+}
+
+::selection {
+    color: #fff;
+    background: var(--simprotem-green);
+}
