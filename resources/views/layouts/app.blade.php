@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- Favicon icon -->
-    <link rel="icon" href="{{ asset('images/simprotem.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('images/favicon-simprotem.png') }}" type="image/png">
     <!-- fontawesome icon -->
     <link rel="stylesheet" href="{{ asset('fonts/fontawesome/css/fontawesome-all.min.css') }}">
     <!-- animation css -->
