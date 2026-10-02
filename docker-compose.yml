@@ -1,6 +1,6 @@
 services:
   superdangsul:
-    image: webdevops/php-nginx:7.4-alpine
+    image: webdevops/php-nginx:8.4-alpine
     container_name: superdangsul
     restart: always
     working_dir: /app
