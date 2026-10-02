@@ -114,7 +114,7 @@
 
                         <li class="nav-item pcoded-hasmenu {{ $masterDataActive ? 'active pcoded-trigger' : '' }}">
                             <a href="javascript:" class="nav-link">
-                                <span class="pcoded-micon"><i class="feather icon-database"></i></span>
+                                <span class="pcoded-micon"><i class="feather icon-grid"></i></span>
                                 <span class="pcoded-mtext">Master Data</span>
                             </a>
                             <ul class="pcoded-submenu">
