@@ -1,0 +1,30 @@
+.fixed-button.active {
+    bottom: 50px;
+    opacity: 1;
+    display: none !important;
+}
+
+.table-responsive {
+    padding-left: 2% !important;
+    padding-right: 2% !important;
+}
+
+.card .card-header {
+    border-bottom: 0px solid #f1f1f1 !important;
+}
+
+table.dataTable tbody td {
+    padding: 15px 10px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 15px !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 21px !important;
+}
+
+label {
+    margin-bottom: 1.5rem !important;
+}

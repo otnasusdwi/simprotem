@@ -1,0 +1,29 @@
+services:
+  superdangsul:
+    image: webdevops/php-nginx:7.4-alpine
+    container_name: superdangsul
+    restart: always
+    working_dir: /app
+    volumes:
+      - .:/app
+      - D:/Sites/tempe/docker/vhost.conf:/opt/docker/etc/nginx/vhost.conf
+    ports:
+      - "8003:80"
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
+      - SCHEDULER_SERVICE_HOST=scheduler
+      - PHP_MEMORY_LIMIT=1G
+      - PHP_MAX_EXECUTION_TIME=300
+      - PHP_POST_MAX_SIZE=50M
+      - PHP_UPLOAD_MAX_FILESIZE=50M
+
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 8192M
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 49999
+        hard: 99999
