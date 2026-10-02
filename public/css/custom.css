@@ -155,18 +155,19 @@ a:focus {
 .pcoded-navbar .sidebar-brand {
     width: 182px;
     height: 50px;
-    padding: 4px 10px;
+    padding: 3px 6px;
     overflow: hidden;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 7px 18px rgba(0, 0, 0, .12);
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
     transition: width .3s ease, padding .3s ease;
 }
 
 .pcoded-navbar .sidebar-logo-full {
     display: block;
-    width: 150px;
-    height: auto;
+    width: 170px;
+    height: 44px;
+    object-fit: contain;
 }
 
 .pcoded-navbar .sidebar-logo-thumb {
@@ -186,7 +187,7 @@ a:focus {
 
 .pcoded-navbar.navbar-collapsed:hover .sidebar-brand {
     width: 182px;
-    padding: 4px 10px;
+    padding: 3px 6px;
 }
 
 .pcoded-navbar .pcoded-inner-navbar li.pcoded-hasmenu > a {
@@ -461,6 +462,91 @@ a:focus {
 .card .card-header h5 {
     font-size: 17px;
     font-weight: 600;
+}
+
+/* Normalize legacy blue theme accents to the Simprotem palette. */
+.card .card-header h5::after {
+    background-color: var(--simprotem-green);
+}
+
+.text-primary,
+.text-info,
+.text-c-blue,
+.text-c-lite-green,
+.btn-link,
+.pcoded-header a,
+.pcoded-header .dropdown-toggle {
+    color: var(--simprotem-green) !important;
+}
+
+.bg-primary,
+.bg-info,
+.bg-c-blue,
+.bg-c-lite-green,
+.label-primary,
+.label-info,
+.progress-bar,
+.btn--blue {
+    color: #fff !important;
+    background-color: var(--simprotem-green) !important;
+    border-color: var(--simprotem-green) !important;
+}
+
+.border-primary,
+.border-info {
+    border-color: var(--simprotem-green) !important;
+}
+
+.alert-primary,
+.alert-info {
+    color: var(--simprotem-green-dark);
+    background-color: var(--simprotem-green-soft);
+    border-color: var(--simprotem-line);
+}
+
+.custom-control-input:checked ~ .custom-control-label::before,
+.custom-checkbox .custom-control-input:indeterminate ~ .custom-control-label::before {
+    background-color: var(--simprotem-green);
+    border-color: var(--simprotem-green);
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 3px rgba(7, 91, 67, .12);
+}
+
+.dataTables_wrapper table.dataTable thead .sorting,
+.dataTables_wrapper table.dataTable thead .sorting_asc,
+.dataTables_wrapper table.dataTable thead .sorting_desc,
+.dataTables_wrapper table.dataTable thead .sorting_asc_disabled,
+.dataTables_wrapper table.dataTable thead .sorting_desc_disabled {
+    position: relative;
+    padding-right: 34px;
+    background-image: none !important;
+}
+
+.dataTables_wrapper table.dataTable thead .sorting::after,
+.dataTables_wrapper table.dataTable thead .sorting_asc::after,
+.dataTables_wrapper table.dataTable thead .sorting_desc::after {
+    position: absolute;
+    top: 50%;
+    right: 13px;
+    font-size: 10px;
+    transform: translateY(-50%);
+}
+
+.dataTables_wrapper table.dataTable thead .sorting::after {
+    content: "\2195";
+    color: var(--simprotem-green-muted);
+}
+
+.dataTables_wrapper table.dataTable thead .sorting_asc::after {
+    content: "\25B2";
+    color: var(--simprotem-green);
+}
+
+.dataTables_wrapper table.dataTable thead .sorting_desc::after {
+    content: "\25BC";
+    color: var(--simprotem-green);
 }
 
 .breadcrumb,

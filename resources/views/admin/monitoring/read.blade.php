@@ -121,9 +121,9 @@
                                                                 <td>
                                                                     <h6 class="mb-1">{{ $index + 1 }}</h6>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="{{ \Carbon\Carbon::parse($row->tgl_laporan)->format('Y-m-d H:i:s') }}">
                                                                     <h6 class="mb-1">
-                                                                        {{ date('d-m-Y', strtotime($row->tgl_laporan)) }}
+                                                                        {{ \Carbon\Carbon::parse($row->tgl_laporan)->locale('id')->translatedFormat('d F Y') }}
                                                                     </h6>
                                                                 </td>
                                                                 <td>

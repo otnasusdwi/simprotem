@@ -88,7 +88,7 @@
 											</form>
 											<hr>
 											<div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap: 12px;">
-												<p class="mb-0 text-muted">Menampilkan <strong>{{ count($data) }}</strong> laporan periode {{ date('d-m-Y', strtotime($get->from)) }} sampai {{ date('d-m-Y', strtotime($get->to)) }}.</p>
+												<p class="mb-0 text-muted">Menampilkan <strong>{{ count($data) }}</strong> laporan periode {{ \Carbon\Carbon::parse($get->from)->locale('id')->translatedFormat('d F Y') }} sampai {{ \Carbon\Carbon::parse($get->to)->locale('id')->translatedFormat('d F Y') }}.</p>
 												<div class="d-flex" style="gap: 8px;">
 													@if ($get->id_tipe)
 													<a target="_blank" class="btn btn-success" href="{{ route('admin.cetak', ['id_user' => $get->id_user ?: 'NULL', 'id_tipe' => $get->id_tipe, 'from' => $get->from, 'to' => $get->to]) }}"><i class="feather icon-download"></i> Excel</a>
@@ -152,18 +152,18 @@
 																	<td>
 																		<h6 class="mb-1">{{ $row->nama_tipe ?: '-' }}</h6>
 														</td>                                                   
-														<td>
-															<h6 class="mb-1">{{ date('d-m-Y', strtotime($row->tgl_laporan)) }}</h6>
+																<td data-order="{{ \Carbon\Carbon::parse($row->tgl_laporan)->format('Y-m-d H:i:s') }}">
+																	<h6 class="mb-1">{{ \Carbon\Carbon::parse($row->tgl_laporan)->locale('id')->translatedFormat('d F Y') }}</h6>
 														</td>
 														<td>
 															<h6 class="mb-1">{{ date('H:i:s', strtotime($row->tgl_laporan)) }}</h6>
 														</td>
-														<td>
+																<td data-order="{{ $row->acc ?: '' }}">
 																		@if ($row->status == 0)
 																		<span class="badge badge-warning px-3 py-2">Belum Dibayar</span>
 																		@else
 																		<span class="badge badge-success px-3 py-2">Sudah Dibayar</span>
-																		<small class="d-block text-muted mt-1">{{ $row->acc ? date('d-m-Y H:i:s', strtotime($row->acc)) : '-' }}</small>
+																		<small class="d-block text-muted mt-1">{{ $row->acc ? \Carbon\Carbon::parse($row->acc)->locale('id')->translatedFormat('d F Y H:i:s') : '-' }}</small>
 																		@endif
 														</td> 
 														<td>

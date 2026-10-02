@@ -72,8 +72,8 @@
 														<td>
 															<h6 class="mb-1">{{$row->name}}</h6>
 														</td>                                                  
-														<td>
-															<h6 class="mb-1">{{ date('d-m-Y', strtotime($row->tgl_laporan)) }}</h6>
+																<td data-order="{{ \Carbon\Carbon::parse($row->tgl_laporan)->format('Y-m-d H:i:s') }}">
+																		<h6 class="mb-1">{{ \Carbon\Carbon::parse($row->tgl_laporan)->locale('id')->translatedFormat('d F Y') }}</h6>
 														</td>
 														<td style="text-align: right;">
 															<h6 class="mb-1">Rp {{ number_format($row->setoran,0,',','.') }},-</h6>

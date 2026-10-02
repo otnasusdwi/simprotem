@@ -36,7 +36,7 @@
         <div class="navbar-wrapper">
             <div class="navbar-brand header-logo">
                 <a href="{{ Auth::user()->level == 1 ? route('admin.monitoring') : route('admin.home') }}" class="b-brand sidebar-brand">
-                    <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem" class="sidebar-logo-full">
+                    <img src="{{ asset('images/simprotem-white.png') }}" alt="Simprotem" class="sidebar-logo-full">
                     <img src="{{ asset('images/favicon-simprotem.png') }}" alt="Simprotem" class="sidebar-logo-thumb logo-thumb">
                 </a>
                 <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
@@ -186,20 +186,9 @@
 
     <script type="text/javascript" charset="utf8" src="{{ asset('DataTables/datatables.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="{{ asset('js/simprotem-datepicker.js') }}"></script>
 
     @yield('script')
-
-    <script type="text/javascript">
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-        });
-
-        $(".datepicker-month").datepicker({
-            format: "mm-yyyy",
-            viewMode: "months",
-            minViewMode: "months"
-        });
-    </script>
 
     <script>
         $(document).ready(function() {

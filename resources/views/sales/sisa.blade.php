@@ -93,15 +93,10 @@
     <script src="{{ asset('front/vendor/select2/select2.min.js') }}"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="{{ asset('js/simprotem-datepicker.js') }}"></script>
     
     <!-- Main JS-->
     <script src="{{ asset('front/js/global.js') }}"></script>
-    
-    <script type="text/javascript">
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-        });
-    </script>
     
 </body><!-- This templates was made by Colorlib (https://colorlib.com) -->
 

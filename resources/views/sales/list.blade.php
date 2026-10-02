@@ -89,8 +89,8 @@
 														<td>
 															<h6 class="mb-1">{{ $index+1 }}</h6>
 														</td>                                               
-														<td>
-															<h6 class="mb-1">{{ date('d-m-Y', strtotime($row->tgl_laporan)) }}</h6>
+																<td data-order="{{ \Carbon\Carbon::parse($row->tgl_laporan)->format('Y-m-d H:i:s') }}">
+																	<h6 class="mb-1">{{ \Carbon\Carbon::parse($row->tgl_laporan)->locale('id')->translatedFormat('d F Y') }}</h6>
 														</td>
 														<td>
 															<h6 class="mb-1">{{ date('H:i:s', strtotime($row->tgl_laporan)) }}</h6>
@@ -101,7 +101,7 @@
 																<h6><strong style="color: red;">Belum Dibayar</strong></h6>
 																@else
 																<h6><strong style="color: green;">Sudah Dibayar</strong></h6>
-																<h6>{{ date('d-m-Y H:i:s', strtotime($row->acc)) }}</h6>
+																		<h6>{{ \Carbon\Carbon::parse($row->acc)->locale('id')->translatedFormat('d F Y H:i:s') }}</h6>
 																@endif
 															</h6>
 														</td> 
