@@ -35,11 +35,9 @@
     <nav class="pcoded-navbar">
         <div class="navbar-wrapper">
             <div class="navbar-brand header-logo">
-                <a href="#" class="b-brand">
-                    {{-- <div class="b-bg">
-                        <i class="feather icon-trending-up"></i>
-                    </div> --}}
-                    <span class="b-title">Tempe Super Dangsul</span>
+                <a href="{{ Auth::user()->level == 1 ? route('admin.monitoring') : route('admin.home') }}" class="b-brand sidebar-brand">
+                    <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem" class="sidebar-logo-full">
+                    <img src="{{ asset('images/favicon-simprotem.png') }}" alt="Simprotem" class="sidebar-logo-thumb logo-thumb">
                 </a>
                 <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
             </div>
@@ -49,122 +47,84 @@
                         <label>Menu</label>
                     </li>
 
+                    @php
+                        $segment = Request::segment(2);
+                        $operasionalActive = in_array($segment, ['home', 'detail', 'detail_setoran', 'edit', 'monitoring', 'create_monitoring', 'detail_monitoring', 'edit_monitoring', 'transaksi'], true);
+                        $keuanganActive = in_array($segment, ['pengeluaran', 'create_pengeluaran', 'edit_pengeluaran', 'debit', 'input_debit', 'detail_debit', 'edit_debit', 'setor_bank', 'input_setor_bank', 'detail_setor_bank', 'edit_setor_bank', 'gaji', 'create_gaji', 'input_gaji', 'edit_gaji'], true);
+                        $persediaanActive = in_array($segment, ['kulit', 'input_kulit', 'detail_kulit', 'edit_kulit', 'kedelai', 'input_kedelai', 'edit_kedelai'], true);
+                        $masterDataActive = in_array($segment, ['pelanggan', 'create_pelanggan', 'edit_pelanggan', 'karyawan', 'create_karyawan', 'edit_karyawan', 'tipe', 'create_tipe', 'edit_tipe', 'sales', 'create_sales', 'edit_sales', 'admin', 'create_admin', 'edit_admin', 'setting', 'create_harga', 'edit_harga'], true);
+                    @endphp
+
                     @if (Auth::user()->level == 1)
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'monitoring' || Request::segment(2) === 'create_monitoring' || Request::segment(2) === 'detail_monitoring' || Request::segment(2) === 'edit_monitoring' ? 'active' : '' }}">
-                            <a href="{{ route('admin.monitoring') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-bar-chart-2"></i></span><span
-                                    class="pcoded-mtext">Monitoring</span></a>
+                        <li class="nav-item pcoded-hasmenu active pcoded-trigger">
+                            <a href="javascript:" class="nav-link">
+                                <span class="pcoded-micon"><i class="feather icon-activity"></i></span>
+                                <span class="pcoded-mtext">Operasional</span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <li class="{{ in_array($segment, ['monitoring', 'create_monitoring', 'detail_monitoring', 'edit_monitoring'], true) ? 'active' : '' }}">
+                                    <a href="{{ route('admin.monitoring') }}">Monitoring</a>
+                                </li>
+                            </ul>
                         </li>
                     @else
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'home' || Request::segment(2) === 'detail' || Request::segment(2) === 'detail_setoran' || Request::segment(2) === 'edit' ? 'active' : '' }}">
-                            <a href="{{ route('admin.home') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-file-text"></i></span><span
-                                    class="pcoded-mtext">Laporan</span></a>
+                        <li class="nav-item pcoded-hasmenu {{ $operasionalActive ? 'active pcoded-trigger' : '' }}">
+                            <a href="javascript:" class="nav-link">
+                                <span class="pcoded-micon"><i class="feather icon-activity"></i></span>
+                                <span class="pcoded-mtext">Operasional</span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <li class="{{ in_array($segment, ['home', 'detail', 'detail_setoran', 'edit'], true) ? 'active' : '' }}">
+                                    <a href="{{ route('admin.home') }}">Laporan</a>
+                                </li>
+                                <li class="{{ in_array($segment, ['monitoring', 'create_monitoring', 'detail_monitoring', 'edit_monitoring'], true) ? 'active' : '' }}">
+                                    <a href="{{ route('admin.monitoring') }}">Monitoring</a>
+                                </li>
+                                <li class="{{ $segment === 'transaksi' ? 'active' : '' }}">
+                                    <a href="{{ route('admin.transaksi') }}">Transaksi</a>
+                                </li>
+                            </ul>
                         </li>
 
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'monitoring' || Request::segment(2) === 'create_monitoring' || Request::segment(2) === 'detail_monitoring' || Request::segment(2) === 'edit_monitoring' ? 'active' : '' }}">
-                            <a href="{{ route('admin.monitoring') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-bar-chart-2"></i></span><span
-                                    class="pcoded-mtext">Monitoring</span></a>
+                        <li class="nav-item pcoded-hasmenu {{ $keuanganActive ? 'active pcoded-trigger' : '' }}">
+                            <a href="javascript:" class="nav-link">
+                                <span class="pcoded-micon"><i class="feather icon-credit-card"></i></span>
+                                <span class="pcoded-mtext">Keuangan</span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <li class="{{ in_array($segment, ['pengeluaran', 'create_pengeluaran', 'edit_pengeluaran'], true) ? 'active' : '' }}"><a href="{{ route('admin.pengeluaran') }}">Data Pengeluaran</a></li>
+                                <li class="{{ in_array($segment, ['debit', 'input_debit', 'detail_debit', 'edit_debit'], true) ? 'active' : '' }}"><a href="{{ route('admin.debit') }}">Debit Kredit Harian</a></li>
+                                @if (Auth::user()->level == 3)
+                                    <li class="{{ in_array($segment, ['setor_bank', 'input_setor_bank', 'detail_setor_bank', 'edit_setor_bank'], true) ? 'active' : '' }}"><a href="{{ route('admin.setor_bank') }}">Uang Setor Bank</a></li>
+                                @endif
+                                <li class="{{ in_array($segment, ['gaji', 'create_gaji', 'input_gaji', 'edit_gaji'], true) ? 'active' : '' }}"><a href="{{ route('admin.gaji') }}">Gaji</a></li>
+                            </ul>
                         </li>
 
-                        <li class="nav-item {{ Request::segment(2) === 'transaksi' ? 'active' : '' }}">
-                            <a href="{{ route('admin.transaksi') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-credit-card"></i></span><span
-                                    class="pcoded-mtext">Transaksi</span></a>
+                        <li class="nav-item pcoded-hasmenu {{ $persediaanActive ? 'active pcoded-trigger' : '' }}">
+                            <a href="javascript:" class="nav-link">
+                                <span class="pcoded-micon"><i class="feather icon-box"></i></span>
+                                <span class="pcoded-mtext">Persediaan</span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <li class="{{ in_array($segment, ['kulit', 'input_kulit', 'detail_kulit', 'edit_kulit'], true) ? 'active' : '' }}"><a href="{{ route('admin.kulit') }}">Stok Kulit</a></li>
+                                <li class="{{ in_array($segment, ['kedelai', 'input_kedelai', 'edit_kedelai'], true) ? 'active' : '' }}"><a href="{{ route('admin.kedelai') }}">Stok Kedelai</a></li>
+                            </ul>
                         </li>
 
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'pengeluaran' || Request::segment(2) === 'create_pengeluaran' || Request::segment(2) === 'edit_pengeluaran' ? 'active' : '' }}">
-                            <a href="{{ route('admin.pengeluaran') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-user"></i></span><span class="pcoded-mtext">Data
-                                    Pengeluaran</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'debit' || Request::segment(2) === 'input_debit' || Request::segment(2) === 'detail_debit' || Request::segment(2) === 'edit_debit' ? 'active' : '' }}">
-                            <a href="{{ route('admin.debit') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-book"></i></span><span class="pcoded-mtext">Debit Kredit
-                                    Harian</span></a>
-                        </li>
-
-                        @if (Auth::user()->level == 3)
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'setor_bank' || Request::segment(2) === 'input_setor_bank' || Request::segment(2) === 'detail_setor_bank' || Request::segment(2) === 'edit_setor_bank' ? 'active' : '' }}">
-                            <a href="{{ route('admin.setor_bank') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-credit-card"></i></span><span class="pcoded-mtext">Uang Setor Bank</span></a>
-                        </li>
-                        @endif
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'pelanggan' || Request::segment(2) === 'create_pelanggan' || Request::segment(2) === 'edit_pelanggan' ? 'active' : '' }}">
-                            <a href="{{ route('admin.pelanggan') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-user"></i></span><span class="pcoded-mtext">Data Pelanggan
-                                    Kulit</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'kulit' || Request::segment(2) === 'input_kulit' || Request::segment(2) === 'detail_kulit' || Request::segment(2) === 'edit_kulit' ? 'active' : '' }}">
-                            <a href="{{ route('admin.kulit') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-layers"></i></span><span class="pcoded-mtext">Stok
-                                    Kulit</span></a>
-                        </li>
-
-                        {{-- <li class="nav-item {{ Request::segment(2) === 'kulit_bulanan' ? 'active' : '' }}">
-                            <a href="{{ route('admin.kulit_bulanan') }}" class="nav-link "><span
-                                    class="pcoded-micon"><i class="feather icon-box"></i></span><span
-                                    class="pcoded-mtext">Stok Kulit (Bulanan)</span></a>
-                        </li> --}}
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'kedelai' || Request::segment(2) === 'input_kedelai' || Request::segment(2) === 'edit_kedelai' ? 'active' : '' }}">
-                            <a href="{{ route('admin.kedelai') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-inbox"></i></span><span class="pcoded-mtext">Stok
-                                    Kedelai</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'karyawan' || Request::segment(2) === 'create_karyawan' || Request::segment(2) === 'edit_karyawan' ? 'active' : '' }}">
-                            <a href="{{ route('admin.karyawan') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-user"></i></span><span class="pcoded-mtext">Data
-                                    Karyawan</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'gaji' || Request::segment(2) === 'create_gaji' || Request::segment(2) === 'input_gaji' || Request::segment(2) === 'edit_gaji' ? 'active' : '' }}">
-                            <a href="{{ route('admin.gaji') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-file-text"></i></span><span
-                                    class="pcoded-mtext">Gaji</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'tipe' || Request::segment(2) === 'create_tipe' || Request::segment(2) === 'edit_tipe' ? 'active' : '' }}">
-                            <a href="{{ route('admin.tipe') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-server"></i></span><span class="pcoded-mtext">Tipe
-                                    Sales</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'sales' || Request::segment(2) === 'create_sales' || Request::segment(2) === 'edit_sales' ? 'active' : '' }}">
-                            <a href="{{ route('admin.sales') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-users"></i></span><span class="pcoded-mtext">Data
-                                    Sales</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'admin' || Request::segment(2) === 'create_admin' || Request::segment(2) === 'edit_admin' ? 'active' : '' }}">
-                            <a href="{{ route('admin.admin') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-user"></i></span><span class="pcoded-mtext">Data
-                                    Admin</span></a>
-                        </li>
-
-                        <li
-                            class="nav-item {{ Request::segment(2) === 'setting' || Request::segment(2) === 'create_harga' || Request::segment(2) === 'edit_harga' ? 'active' : '' }}">
-                            <a href="{{ route('admin.setting') }}" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-settings"></i></span><span class="pcoded-mtext">Setting
-                                    Harga</span></a>
+                        <li class="nav-item pcoded-hasmenu {{ $masterDataActive ? 'active pcoded-trigger' : '' }}">
+                            <a href="javascript:" class="nav-link">
+                                <span class="pcoded-micon"><i class="feather icon-database"></i></span>
+                                <span class="pcoded-mtext">Master Data</span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <li class="{{ in_array($segment, ['pelanggan', 'create_pelanggan', 'edit_pelanggan'], true) ? 'active' : '' }}"><a href="{{ route('admin.pelanggan') }}">Data Pelanggan Kulit</a></li>
+                                <li class="{{ in_array($segment, ['karyawan', 'create_karyawan', 'edit_karyawan'], true) ? 'active' : '' }}"><a href="{{ route('admin.karyawan') }}">Data Karyawan</a></li>
+                                <li class="{{ in_array($segment, ['tipe', 'create_tipe', 'edit_tipe'], true) ? 'active' : '' }}"><a href="{{ route('admin.tipe') }}">Tipe Sales</a></li>
+                                <li class="{{ in_array($segment, ['sales', 'create_sales', 'edit_sales'], true) ? 'active' : '' }}"><a href="{{ route('admin.sales') }}">Data Sales</a></li>
+                                <li class="{{ in_array($segment, ['admin', 'create_admin', 'edit_admin'], true) ? 'active' : '' }}"><a href="{{ route('admin.admin') }}">Data Admin</a></li>
+                                <li class="{{ in_array($segment, ['setting', 'create_harga', 'edit_harga'], true) ? 'active' : '' }}"><a href="{{ route('admin.setting') }}">Setting Harga</a></li>
+                            </ul>
                         </li>
                     @endif
                 </ul>
@@ -177,11 +137,8 @@
     <header class="navbar pcoded-header navbar-expand-lg navbar-light">
         <div class="m-header">
             <a class="mobile-menu" id="mobile-collapse1" href="javascript:"><span></span></a>
-            <a href="index.html" class="b-brand">
-                <div class="b-bg">
-                    <i class="feather icon-trending-up"></i>
-                </div>
-                <span class="b-title">Super Dangsul</span>
+            <a href="{{ Auth::user()->level == 1 ? route('admin.monitoring') : route('admin.home') }}" class="b-brand mobile-brand">
+                <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem">
             </a>
         </div>
         <a class="mobile-menu" id="mobile-header" href="javascript:">

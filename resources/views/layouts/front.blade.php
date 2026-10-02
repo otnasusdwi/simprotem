@@ -34,11 +34,9 @@
     <nav class="pcoded-navbar">
         <div class="navbar-wrapper">
             <div class="navbar-brand header-logo">
-                <a href="#" class="b-brand">
-                    {{-- <div class="b-bg">
-                        <i class="feather icon-trending-up"></i>
-                    </div> --}}
-                    <span class="b-title">Tempe Super Dangsul</span>
+                <a href="{{ route('sales.home') }}" class="b-brand sidebar-brand">
+                    <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem" class="sidebar-logo-full">
+                    <img src="{{ asset('images/favicon-simprotem.png') }}" alt="Simprotem" class="sidebar-logo-thumb logo-thumb">
                 </a>
                 <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
             </div>
@@ -48,13 +46,20 @@
                         <label>Menu</label>
                     </li>
                     
-                    <li class="nav-item {{Request::segment(2) === 'home' || Request::segment(2) === 'input' || Request::segment(2) === 'validasi' || Request::segment(2) === 'lapor' ? 'active' : ''}}">
-                        <a href="{{ route('sales.home') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Laporan Harian</span></a>
+                    @php
+                        $segment = Request::segment(2);
+                        $operasionalActive = in_array($segment, ['home', 'input', 'validasi', 'lapor', 'list', 'detail'], true);
+                    @endphp
+                    <li class="nav-item pcoded-hasmenu {{ $operasionalActive ? 'active pcoded-trigger' : '' }}">
+                        <a href="javascript:" class="nav-link">
+                            <span class="pcoded-micon"><i class="feather icon-activity"></i></span>
+                            <span class="pcoded-mtext">Operasional</span>
+                        </a>
+                        <ul class="pcoded-submenu">
+                            <li class="{{ in_array($segment, ['home', 'input', 'validasi', 'lapor'], true) ? 'active' : '' }}"><a href="{{ route('sales.home') }}">Laporan Harian</a></li>
+                            <li class="{{ in_array($segment, ['list', 'detail'], true) ? 'active' : '' }}"><a href="{{ route('sales.list') }}">Data Laporan</a></li>
+                        </ul>
                     </li>
-                    
-                    <li class="nav-item {{Request::segment(2) === 'list' || Request::segment(2) === 'detail' ? 'active' : ''}}">
-                        <a href="{{ route('sales.list') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-server"></i></span><span class="pcoded-mtext">Data Laporan</span></a>
-                    </li>                
                 </ul>
             </div>
         </div>
@@ -65,11 +70,8 @@
     <header class="navbar pcoded-header navbar-expand-lg navbar-light">
         <div class="m-header">
             <a class="mobile-menu" id="mobile-collapse1" href="javascript:"><span></span></a>
-            <a href="index.html" class="b-brand">
-                <div class="b-bg">
-                    <i class="feather icon-trending-up"></i>
-                </div>
-                <span class="b-title">Super Dangsul</span>
+            <a href="{{ route('sales.home') }}" class="b-brand mobile-brand">
+                <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem">
             </a>
         </div>
         <a class="mobile-menu" id="mobile-header" href="javascript:">
