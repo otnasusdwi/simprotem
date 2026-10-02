@@ -43,8 +43,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/edit/{id_laporan}', 'AdminHomeController@edit')->name('admin.edit')->middleware('is_admin');
     Route::post('/update', 'AdminHomeController@update')->name('admin.update')->middleware('is_admin');
     // Route::get('/edit/{id_item_laporan}', 'AdminHomeController@edit')->name('admin.edit')->middleware('is_admin');
-    Route::get('/status/{id_laporan}', 'AdminHomeController@status')->name('admin.status')->middleware('is_admin');
-    Route::get('/hapus/{id_laporan}', 'AdminHomeController@hapus')->name('admin.hapus')->middleware('is_admin');
+    Route::patch('/status/{id_laporan}', 'AdminHomeController@status')->name('admin.status')->middleware('is_admin');
+    Route::delete('/hapus/{id_laporan}', 'AdminHomeController@hapus')->name('admin.hapus')->middleware('is_admin');
     Route::post('/postcetak', 'AdminHomeController@postCetak')->name('admin.postcetak')->middleware('is_admin');
     Route::get('/cetak', 'AdminHomeController@cetakExcel')->name('admin.cetak')->middleware('is_admin');
     Route::get('/cetakpdf', 'AdminHomeController@cetakPDF')->name('admin.cetakpdf')->middleware('is_admin');

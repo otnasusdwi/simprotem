@@ -28,69 +28,74 @@
 						<div class="row">
 							<!--[ Recent Users ] start-->
 							<div class="col-xl-12 col-md-12">
-								<div class="card Recent-Users">
-									<div class="card-header">
-										<form method="get" action="">
-											<div class="row">
-												<input type="hidden" name="filter" value="{{$get->filter}}">
-												<div class="col-xl-2 col-md-2">
-													<div class="form-group">
-														<select class="form-control" id="exampleFormControlSelect1" name="id_tipe" id="id_tipe">
-															{{-- <option selected disabled>- Pilih Tipe -</option> --}}
-															<option value="">Semua Tipe</option>
+									<div class="card Recent-Users">
+										<div class="card-header">
+											@if ($errors->any())
+											<div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+											@endif
+											@if (session('success'))
+											<div class="alert alert-success" role="alert">{{ session('success') }}</div>
+											@endif
+											<form method="get" action="{{ route('admin.home') }}">
+												<div class="row">
+													<div class="col-xl-2 col-md-2">
+														<div class="form-group">
+															<label for="id_tipe">Tipe</label>
+															<div class="filter-select-wrap">
+															<select class="form-control" name="id_tipe" id="id_tipe" aria-describedby="tipe-loading">
+																<option value="">Semua Tipe</option>
 															@foreach($tipe as $row)
 															<option value="{{ $row->id_tipe }}"  @if($row->id_tipe==$get->id_tipe) selected @endif>{{ $row->tipe }}</option>
 															@endforeach
-														</select>
+															</select>
+															<span class="filter-select-loader" id="tipe-loading" role="status" aria-live="polite"><span class="filter-select-spinner"></span><span class="sr-only">Memuat pilihan tipe</span></span>
+															</div>
 													</div>
 												</div>
-												<div class="col-xl-2 col-md-2">
-													<div class="form-group">
-														<select class="form-control" id="exampleFormControlSelect1" name="id_user">
-															<option value="">Semua Sales</option>
-															@foreach($sales as $row)
-															<option value="{{ $row->id }}"  @if($row->id==$get->id_user) selected @endif>{{ $row->name }}</option>
+													<div class="col-xl-2 col-md-2">
+														<div class="form-group">
+															<label for="id_user">Sales</label>
+															<div class="filter-select-wrap">
+															<select class="form-control" name="id_user" id="id_user" aria-describedby="sales-loading">
+																<option value="">Semua Sales</option>
+																@foreach($sales as $row)
+																<option value="{{ $row->id }}" data-tipe="{{ $row->tipe }}" @if($row->id==$get->id_user) selected @endif>{{ $row->name }}</option>
 															@endforeach
-														</select>
+															</select>
+															<span class="filter-select-loader" id="sales-loading" role="status" aria-live="polite"><span class="filter-select-spinner"></span><span class="sr-only">Memuat pilihan sales</span></span>
+															</div>
 													</div>
 												</div>
-												<div class="col-xl-2 col-md-2">
-													<div class="form-group">
-														<input type="text" required class="form-control datepicker" placeholder="Tanggal Awal" name="from" required="required" value="{{$get->from}}">
+													<div class="col-xl-2 col-md-2">
+														<div class="form-group">
+															<label for="from">Tanggal Awal</label>
+															<input id="from" type="text" class="form-control datepicker" placeholder="Tanggal Awal" name="from" value="{{$get->from}}" autocomplete="off" required>
 													</div>
 												</div>
-												<div class="col-xl-2 col-md-2">
-													<div class="form-group">
-														<input type="text" required class="form-control datepicker" placeholder="Tanggal Akhir" name="to" required="required" value="{{$get->to}}">
+													<div class="col-xl-2 col-md-2">
+														<div class="form-group">
+															<label for="to">Tanggal Akhir</label>
+															<input id="to" type="text" class="form-control datepicker" placeholder="Tanggal Akhir" name="to" value="{{$get->to}}" autocomplete="off" required>
+														</div>
 													</div>
-												</div>
-												
-												<div class="col-xl-2 col-md-2">
-													<button type="submit" class="btn theme-bg" style="color: white; width: 100%;">Lihat</button>
-												</div>
-
-												<div class="col-xl-2 col-md-2">
-													<a href="{{ route('admin.cetakpdf', ['id_user' => $get->id_user, 'id_tipe' => $get->id_tipe, 'from' => $get->from, 'to' => $get->to]) }}" class="btn btn-danger" style="color: white; width: 100%;" target="_blank">
-														<i class="feather icon-file-text"></i> Download PDF
-													</a>
-												</div>
-												
-												@if ($get->id_tipe)
-												<div class="col-xl-2 col-md-2">
-													<div class="dropdown">
-														<button class="theme-bg btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-															Cetak
-														</button>
-														<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-															<a target="_blank" class="dropdown-item" href="{{ route('admin.cetak') }}?id_user={{isset($get->id_user) ? $get->id_user : 'NULL'}}&id_tipe={{isset($get->id_tipe) ? $get->id_tipe : 'NULL'}}&from={{$get->from}}&to={{$get->to}}">Export Excel</a>
-															<a target="_blank" class="dropdown-item" href="{{ route('admin.cetakpdf') }}?id_user={{isset($get->id_user) ? $get->id_user : 'NULL'}}&id_tipe={{isset($get->id_tipe) ? $get->id_tipe : 'NULL'}}&from={{$get->from}}&to={{$get->to}}">Cetak PDF</a>
+													<div class="col-xl-4 col-md-4 d-flex align-items-end">
+														<div class="form-group d-flex w-100" style="gap: 8px;">
+															<button type="submit" class="btn theme-bg flex-fill text-white"><i class="feather icon-search"></i> Lihat</button>
+															<a href="{{ route('admin.home') }}" class="btn btn-simprotem-outline flex-fill"><i class="feather icon-rotate-ccw"></i> Reset</a>
 														</div>
 													</div>
 												</div>
-												@endif
+											</form>
+											<hr>
+											<div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap: 12px;">
+												<p class="mb-0 text-muted">Menampilkan <strong>{{ count($data) }}</strong> laporan periode {{ date('d-m-Y', strtotime($get->from)) }} sampai {{ date('d-m-Y', strtotime($get->to)) }}.</p>
+												<div class="d-flex" style="gap: 8px;">
+													@if ($get->id_tipe)
+													<a target="_blank" class="btn btn-success" href="{{ route('admin.cetak', ['id_user' => $get->id_user ?: 'NULL', 'id_tipe' => $get->id_tipe, 'from' => $get->from, 'to' => $get->to]) }}"><i class="feather icon-download"></i> Excel</a>
+													@endif
+													<a target="_blank" class="btn btn-warning" href="{{ route('admin.cetakpdf', ['id_user' => $get->id_user, 'id_tipe' => $get->id_tipe, 'from' => $get->from, 'to' => $get->to]) }}"><i class="feather icon-file-text"></i> PDF</a>
+												</div>
 											</div>
-										</form>
-										<hr>
 										@if ($get->id_tipe && $get->id_user)
 										@if ($setoran != 0)
 										<div class="row">
@@ -144,14 +149,8 @@
 														<td>
 															<h6 class="mb-1">{{$row->name}}</h6>
 														</td>  
-														<td>
-															<h6 class="mb-1">
-																@foreach($tipe as $tp)
-																@if ($tp->id_tipe == $row->id_tipe)
-																{{ $tp->tipe }}
-																@endif
-																@endforeach
-															</h6>
+																	<td>
+																		<h6 class="mb-1">{{ $row->nama_tipe ?: '-' }}</h6>
 														</td>                                                   
 														<td>
 															<h6 class="mb-1">{{ date('d-m-Y', strtotime($row->tgl_laporan)) }}</h6>
@@ -160,14 +159,12 @@
 															<h6 class="mb-1">{{ date('H:i:s', strtotime($row->tgl_laporan)) }}</h6>
 														</td>
 														<td>
-															<h6 class="mb-1">
-																@if ( $row->status == 0 )
-																<h6><strong style="color: red;">Belum Dibayar</strong></h6>
-																@else
-																<h6><strong style="color: green;">Sudah Dibayar</strong></h6>
-																<h6>{{ date('d-m-Y H:i:s', strtotime($row->acc)) }}</h6>
-																@endif
-															</h6>
+																		@if ($row->status == 0)
+																		<span class="badge badge-warning px-3 py-2">Belum Dibayar</span>
+																		@else
+																		<span class="badge badge-success px-3 py-2">Sudah Dibayar</span>
+																		<small class="d-block text-muted mt-1">{{ $row->acc ? date('d-m-Y H:i:s', strtotime($row->acc)) : '-' }}</small>
+																		@endif
 														</td> 
 														<td>
 															<div class="dropdown">
@@ -177,15 +174,17 @@
 																<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 																	@if (Auth::user()->level != 1)
 																	@if ($row->status == 0)
-																	<a class="dropdown-item" href="#" onclick="stat('{{ url('admin/status', $row->id_laporan) }}')">Ubah Status</a>
+																								<a class="dropdown-item" href="#" onclick="confirmReportStatus('{{ route('admin.status', $row->id_laporan) }}'); return false;"><i class="feather icon-check-circle mr-2"></i>Ubah Status</a>
 																	@endif
 																	@endif
-																	<a class="dropdown-item" href="{{ route('admin.detail', $row->id_laporan) }}">Detail</a>
-																	<a target="_blank" class="dropdown-item" href="{{ route('admin.pdf') }}?id_laporan={{ $row->id_laporan}}">Print</a>
-																	<a target="_blank" class="dropdown-item" href="{{ route('admin.pdf-kasir') }}?id_laporan={{ $row->id_laporan}}">Print Kasir</a>
-																	@if (Auth::user()->level != 1)
-																	<a class="dropdown-item" href="{{ route('admin.edit', $row->id_laporan) }}">Edit</a>
-																	<a class="dropdown-item" href="#" onclick="del('{{ url('admin/hapus', $row->id_laporan) }}')">Hapus</a>
+																							<a class="dropdown-item" href="{{ route('admin.detail', $row->id_laporan) }}"><i class="feather icon-eye mr-2"></i>Detail</a>
+																							<div class="dropdown-divider"></div>
+																							<a target="_blank" class="dropdown-item" href="{{ route('admin.pdf', ['id_laporan' => $row->id_laporan]) }}"><i class="feather icon-printer mr-2"></i>Print</a>
+																							<a target="_blank" class="dropdown-item" href="{{ route('admin.pdf-kasir', ['id_laporan' => $row->id_laporan]) }}"><i class="feather icon-file-text mr-2"></i>Print Kasir</a>
+																							@if (Auth::user()->level != 1)
+																							<div class="dropdown-divider"></div>
+																							<a class="dropdown-item" href="{{ route('admin.edit', $row->id_laporan) }}"><i class="feather icon-edit-2 mr-2"></i>Edit</a>
+																							<a class="dropdown-item text-danger" href="#" onclick="confirmReportDelete('{{ route('admin.hapus', $row->id_laporan) }}'); return false;"><i class="feather icon-trash-2 mr-2"></i>Hapus</a>
 																	@endif
 																</div>
 															</div>
@@ -223,7 +222,11 @@
 				<div class="text-center">
 					<div class="xs-mt-50">
 						<button type="button" data-dismiss="modal" class="btn btn-space btn-default">Batal</button>
-						<i id="del"></i>
+							<form id="report-delete-form" method="POST" action="" class="d-inline">
+								@csrf
+								@method('DELETE')
+								<button type="submit" class="btn btn-danger">Hapus</button>
+							</form>
 					</div>
 				</div>
 			</div>
@@ -244,7 +247,11 @@
 				<div class="text-center">
 					<div class="xs-mt-50">
 						<button type="button" data-dismiss="modal" class="btn btn-space btn-default">Batal</button>
-						<i id="stat"></i>
+							<form id="report-status-form" method="POST" action="" class="d-inline">
+								@csrf
+								@method('PATCH')
+								<button type="submit" class="btn btn-primary">Ubah Status</button>
+							</form>
 					</div>
 				</div>
 			</div>
@@ -252,38 +259,62 @@
 	</div>
 </div>
 @endsection
-{{-- @section('script')
+@section('script')
 <script>
-	$(document).ready(function () {
-		$('#id_tipe').on('change', function () {
-			var id_tipe = $(this).val();
-			if (id_tipe) {
-				$.ajax({
-					url: '/getsales/' + id_tipe,
-					type: "GET",
-					data: {
-						"_token": "{{ csrf_token() }}"
-					},
-					dataType: "json",
-					success: function (data) {
-						if (data) {
-							console.log(data);
-							$('#id_user').empty();
-							$('#id_user').append('<option value="0">Semua Sales</option>');
-							$.each(data, function (key, id_user) {
-								console.log(id_user);
-								$('select[name="id_user"]').append('<option value="' + id_user + '">' +
-									id_user + '</option>');
-							});
-						} else {
-							$('#id_user').empty();
-						}
+		$(document).ready(function () {
+			var selectedSales = @json((string) ($get->id_user ?? ''));
+			var salesOptions = @json($salesOptions);
+
+			function refreshSalesOptions() {
+				var selectedType = String($('#id_tipe').val() || '');
+				var $sales = $('#id_user');
+				$sales.empty().append($('<option>', { value: '', text: 'Semua Sales' }));
+
+				$.each(salesOptions, function (_, sales) {
+					if (!selectedType || sales.tipe === selectedType) {
+						$sales.append($('<option>', {
+							value: sales.id,
+							text: sales.name,
+							selected: sales.id === selectedSales
+						}));
 					}
 				});
-			} else {
-				$('#id_user').empty();
+
+				if (!$sales.find('option:selected').length) {
+					$sales.val('');
+				}
 			}
+
+			function withSelectLoader($select, callback) {
+				var $wrapper = $select.closest('.filter-select-wrap');
+				$wrapper.addClass('is-loading');
+				$select.attr('aria-busy', 'true');
+
+				window.setTimeout(function () {
+					callback();
+					$select.removeAttr('aria-busy');
+					$wrapper.removeClass('is-loading');
+				}, 220);
+			}
+
+			refreshSalesOptions();
+			$('#id_tipe').on('change', function () {
+				selectedSales = '';
+				withSelectLoader($('#id_tipe, #id_user'), refreshSalesOptions);
+			});
+			$('#id_user').on('change', function () {
+				withSelectLoader($(this), function () {});
+			});
 		});
-	});
+
+	function confirmReportDelete(url) {
+		$('#report-delete-form').attr('action', url);
+		$('#delete').modal('show');
+	}
+
+	function confirmReportStatus(url) {
+		$('#report-status-form').attr('action', url);
+		$('#status').modal('show');
+	}
 </script>
-@endsection --}}
+@endsection

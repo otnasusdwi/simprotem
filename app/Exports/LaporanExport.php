@@ -14,7 +14,12 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class LaporanExport implements FromView
 {
-    public function __construct(string $id_user, string $id_tipe, string $from, string $to)
+    private ?string $id_user;
+    private string $id_tipe;
+    private string $from;
+    private string $to;
+
+    public function __construct(?string $id_user, string $id_tipe, string $from, string $to)
     {
         $this->id_user = $id_user;
         $this->id_tipe = $id_tipe;
@@ -25,24 +30,18 @@ class LaporanExport implements FromView
     {
         $q = DB::table('laporan')
         ->join('users', 'laporan.id_user', '=', 'users.id')
-        ->select('laporan.*', 'users.name', 'users.piutang');
+        ->select('laporan.*', 'users.name', 'users.piutang as piutang_sales');
 
-        if($this->from){
-            $q->whereDate('laporan.tgl_laporan', '>=', $this->from)
-            ->whereDate('laporan.tgl_laporan', '<=', $this->to);
-        }else{
-            $now = Carbon::now();
-            $month = $now->month;
-            $q->whereMonth('laporan.tgl_laporan', '=', $month);
-        }
+        $q->whereBetween('laporan.tgl_laporan', [
+            Carbon::parse($this->from)->startOfDay(),
+            Carbon::parse($this->to)->endOfDay(),
+        ]);
         
-        if($this->id_user != 'NULL'){
+        if($this->id_user){
             $q->where('laporan.id_user', $this->id_user);
         }
         
-        if($this->id_tipe != 'NULL'){
-            $q->where('laporan.id_tipe', $this->id_tipe);
-        }
+        $q->where('laporan.id_tipe', $this->id_tipe);
 
         $laporan = $q->orderBy('laporan.tgl_laporan', 'asc')->get();
 
@@ -62,8 +61,9 @@ class LaporanExport implements FromView
         // dd($item_laporan);
         
         $item_laporan = DB::table('item_laporan')
-        ->orderBy('harga', 'desc')
-        ->get();
+            ->whereIn('id_laporan', $laporan->pluck('id_laporan'))
+            ->orderBy('harga', 'desc')
+            ->get();
         
         $harga = DB::table('harga')
         ->where('id_tipe', '=', $this->id_tipe)

@@ -18,39 +18,52 @@ use Carbon\Carbon;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use PDF;
 use Ramsey\Uuid\Uuid;
 use Response;
 
 class AdminHomeController extends Controller
 {
+    private function authorizeReportManagement(): void
+    {
+        abort_unless(Auth::check() && in_array((string) Auth::user()->level, ['2', '3'], true), 403);
+    }
+
     public function index(Request $request)
     {
-        $filter  = $request->filter;
-        $from    = $request->from;
-        $to      = $request->to;
-        $id_user = $request->id_user;
-        $id_tipe = $request->id_tipe;
-        $now     = date('Y-m-d');
+        $validated = $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d', 'required_with:to'],
+            'to' => ['nullable', 'date_format:Y-m-d', 'required_with:from', 'after_or_equal:from'],
+            'id_user' => ['nullable', 'integer', 'exists:users,id'],
+            'id_tipe' => ['nullable', 'integer', 'exists:tipe,id_tipe'],
+        ]);
+
+        $id_user = $validated['id_user'] ?? null;
+        $id_tipe = $validated['id_tipe'] ?? null;
+        $from = $validated['from'] ?? Carbon::now()->subDays(2)->format('Y-m-d');
+        $to = $validated['to'] ?? Carbon::now()->format('Y-m-d');
+
+        if ($id_user && $id_tipe && ! User::whereKey($id_user)->where('role', 'sales')->where('tipe', $id_tipe)->exists()) {
+            throw ValidationException::withMessages([
+                'id_user' => 'Sales yang dipilih tidak termasuk dalam tipe tersebut.',
+            ]);
+        }
 
         $get = (object) [
-            'filter'  => $request->filter,
-            'from'    => $request->from,
-            'to'      => $request->to,
-            'id_user' => $request->id_user,
-            'id_tipe' => $request->id_tipe,
+            'from' => $from,
+            'to' => $to,
+            'id_user' => $id_user,
+            'id_tipe' => $id_tipe,
         ];
 
         $q = Laporan::join('users', 'laporan.id_user', '=', 'users.id')
-            ->select('laporan.*', 'users.name', 'users.piutang');
-
-        if ($from && $to) {
-            $q->whereDate('laporan.tgl_laporan', '>=', $from)
-                ->whereDate('laporan.tgl_laporan', '<=', $to);
-        } else {
-            $q->whereDate('laporan.tgl_laporan', '>=', date('Y-m-d', strtotime($now . "-2 days")))
-                ->whereDate('laporan.tgl_laporan', '<=', $now);
-        }
+            ->leftJoin('tipe', 'laporan.id_tipe', '=', 'tipe.id_tipe')
+            ->select('laporan.*', 'users.name', 'users.piutang as piutang_sales', 'tipe.tipe as nama_tipe')
+            ->whereBetween('laporan.tgl_laporan', [
+                Carbon::parse($from)->startOfDay(),
+                Carbon::parse($to)->endOfDay(),
+            ]);
 
         if ($id_user) {
             $q->where('laporan.id_user', $id_user);
@@ -60,14 +73,18 @@ class AdminHomeController extends Controller
             $q->where('laporan.id_tipe', $id_tipe);
         }
 
+        $setoran = (clone $q)->sum('laporan.setoran');
         $data = $q->orderBy('laporan.created_at', 'desc')->get();
-
-        $setoran = $q->sum('laporan.setoran');
 
         $sales = DB::table('users')
             ->orderBy('name', 'asc')
             ->where('role', 'sales')
             ->get();
+        $salesOptions = $sales->map(fn ($salesUser) => [
+            'id' => (string) $salesUser->id,
+            'name' => $salesUser->name,
+            'tipe' => (string) $salesUser->tipe,
+        ])->values();
 
         $tipe = DB::table('tipe')
             ->orderBy('tipe', 'asc')
@@ -75,15 +92,22 @@ class AdminHomeController extends Controller
 
         // dd($setoran);
 
-        return view('admin.laporan.read')->with(['data' => $data, 'sales' => $sales, 'tipe' => $tipe, 'get' => $get, 'setoran' => $setoran]);
+        return view('admin.laporan.read')->with([
+            'data' => $data,
+            'sales' => $sales,
+            'salesOptions' => $salesOptions,
+            'tipe' => $tipe,
+            'get' => $get,
+            'setoran' => $setoran,
+        ]);
     }
 
     public function getSales($id_tipe)
     {
         if ($id_tipe == 0) {
-            $data = User::orderBy('name', 'ASC')->get();
+            $data = User::where('role', 'sales')->orderBy('name', 'ASC')->get(['id', 'name', 'tipe']);
         } else {
-            $data = User::where('tipe', $id_tipe)->orderBy('name', 'ASC')->get();
+            $data = User::where('role', 'sales')->where('tipe', $id_tipe)->orderBy('name', 'ASC')->get(['id', 'name', 'tipe']);
         }
 
         return response()->json($data);
@@ -730,10 +754,16 @@ class AdminHomeController extends Controller
 
     public function detailSetoran(Request $request)
     {
-        $from    = $request->from;
-        $to      = $request->to;
-        $id_user = $request->id_user;
-        $id_tipe = $request->id_tipe;
+        $validated = $request->validate([
+            'from' => ['required', 'date_format:Y-m-d'],
+            'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'id_user' => ['required', 'integer', 'exists:users,id'],
+            'id_tipe' => ['required', 'integer', 'exists:tipe,id_tipe'],
+        ]);
+        $from = $validated['from'];
+        $to = $validated['to'];
+        $id_user = $validated['id_user'];
+        $id_tipe = $validated['id_tipe'];
 
         $get = (object) [
             'from'    => $request->from,
@@ -746,8 +776,7 @@ class AdminHomeController extends Controller
             ->select('laporan.*', 'users.name')
             ->where('laporan.id_user', $id_user)
             ->where('laporan.id_tipe', $id_tipe)
-            ->whereDate('laporan.tgl_laporan', '>=', $from)
-            ->whereDate('laporan.tgl_laporan', '<=', $to)
+            ->whereBetween('laporan.tgl_laporan', [Carbon::parse($from)->startOfDay(), Carbon::parse($to)->endOfDay()])
             ->orderBy('laporan.tgl_laporan', 'ASC')
             ->get();
 
@@ -755,8 +784,7 @@ class AdminHomeController extends Controller
             ->select('laporan.*', 'users.name')
             ->where('laporan.id_user', $id_user)
             ->where('laporan.id_tipe', $id_tipe)
-            ->whereDate('laporan.tgl_laporan', '>=', $from)
-            ->whereDate('laporan.tgl_laporan', '<=', $to)
+            ->whereBetween('laporan.tgl_laporan', [Carbon::parse($from)->startOfDay(), Carbon::parse($to)->endOfDay()])
             ->orderBy('laporan.tgl_laporan', 'ASC')
             ->sum('laporan.setoran');
 
@@ -769,7 +797,7 @@ class AdminHomeController extends Controller
     {
         $laporan = DB::table('laporan')
             ->where('id_laporan', $id_laporan)
-            ->first();
+            ->firstOrFail();
 
         $data = DB::table('item_laporan')
             ->join('laporan', 'item_laporan.id_laporan', '=', 'laporan.id_laporan')
@@ -777,10 +805,12 @@ class AdminHomeController extends Controller
             ->select('item_laporan.*', 'laporan.jumlah_laku', 'laporan.marginsales', 'laporan.setoran', 'laporan.hutang_baru', 'laporan.pelunasan', 'laporan.piutang', 'laporan.status', 'laporan.tgl_laporan', 'laporan.acc')
             ->get();
 
+        abort_if($data->isEmpty(), 404);
+
         // dd($data);
 
         $tgl_laporan = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('l, d F Y - H:i:s');
-        $acc         = Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s');
+        $acc         = $data[0]->acc ? Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s') : '-';
         $status      = $data[0]->status;
         $day_laporan = date('l', strtotime($data[0]->tgl_laporan));
         $day_acc     = date('l', strtotime($data[0]->acc));
@@ -789,6 +819,8 @@ class AdminHomeController extends Controller
 
         $tgl        = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('Y-m-d');
         $monitoring = [];
+        $sedia = [];
+        $tambah = [];
 
         $datas = DB::table('item_monitoring')
             ->whereDate('tgl_laporan', $tgl)
@@ -804,12 +836,9 @@ class AdminHomeController extends Controller
                 $tambah[$i] = $row->tambah_sales;
             }
         } else {
-            $nominal = DB::table('harga')
-                ->orderBy('harga', 'desc')
-                ->where('id_tipe', Auth::user()->tipe)
-                ->get();
-            foreach ($nominal as $i => $hrg) {
-                $monitoring[$i] = 0;
+            foreach ($data as $i => $item) {
+                $sedia[$i] = 0;
+                $tambah[$i] = $item->tambah ?? 0;
             }
         }
 
@@ -818,9 +847,11 @@ class AdminHomeController extends Controller
 
     public function edit($id_laporan)
     {
+        $this->authorizeReportManagement();
+
         $laporan = DB::table('laporan')
             ->where('id_laporan', $id_laporan)
-            ->first();
+            ->firstOrFail();
 
         $user = User::where('id', $laporan->id_user)->first();
 
@@ -832,10 +863,12 @@ class AdminHomeController extends Controller
             ->select('item_laporan.*', 'laporan.jumlah_laku', 'laporan.marginsales', 'laporan.setoran', 'laporan.hutang_baru', 'laporan.pelunasan', 'laporan.piutang', 'laporan.status', 'laporan.tgl_laporan', 'laporan.acc')
             ->get();
 
+        abort_if($data->isEmpty(), 404);
+
         // dd($data);
         $tgl         = $data[0]->tgl_laporan;
         $tgl_laporan = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('l, d F Y - H:i:s');
-        $acc         = Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s');
+        $acc         = $data[0]->acc ? Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s') : '-';
         $status      = $data[0]->status;
         $day_laporan = date('l', strtotime($data[0]->tgl_laporan));
         $day_acc     = date('l', strtotime($data[0]->acc));
@@ -844,6 +877,8 @@ class AdminHomeController extends Controller
 
         $tgl        = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('Y-m-d');
         $monitoring = [];
+        $sedia = [];
+        $tambah = [];
 
         $datas = DB::table('item_monitoring')
             ->whereDate('tgl_laporan', $tgl)
@@ -859,12 +894,9 @@ class AdminHomeController extends Controller
                 $tambah[$i] = $row->tambah_sales;
             }
         } else {
-            $nominal = DB::table('harga')
-                ->orderBy('harga', 'desc')
-                ->where('id_tipe', Auth::user()->tipe)
-                ->get();
-            foreach ($nominal as $i => $hrg) {
-                $monitoring[$i] = 0;
+            foreach ($data as $i => $item) {
+                $sedia[$i] = 0;
+                $tambah[$i] = $item->tambah ?? 0;
             }
         }
 
@@ -885,6 +917,39 @@ class AdminHomeController extends Controller
 
     public function update(Request $request)
     {
+        $this->authorizeReportManagement();
+
+        $request->validate([
+            'id_laporan' => ['required', 'string', 'exists:laporan,id_laporan'],
+            'tgl_laporan' => ['required', 'date_format:Y-m-d'],
+            'id_user' => ['required', 'integer', 'exists:users,id'],
+            'tipe' => ['required', 'integer', 'exists:tipe,id_tipe'],
+            'piutang' => ['required', 'numeric', 'min:0'],
+            'hutang_baru' => ['required', 'numeric', 'min:0'],
+            'pelunasan' => ['required', 'numeric', 'min:0'],
+            'harga' => ['required', 'array', 'min:1'],
+            'harga.*' => ['required', 'numeric', 'min:0'],
+            'bawa' => ['required', 'array', 'min:1'],
+            'bawa.*' => ['required', 'numeric', 'min:0'],
+            'tambah' => ['required', 'array', 'min:1'],
+            'tambah.*' => ['required', 'numeric', 'min:0'],
+            'sisa_muda' => ['required', 'array', 'min:1'],
+            'sisa_muda.*' => ['required', 'numeric', 'min:0'],
+            'sisa_tua' => ['required', 'array', 'min:1'],
+            'sisa_tua.*' => ['required', 'numeric', 'min:0'],
+            'sedia' => ['required', 'array', 'min:1'],
+            'sedia.*' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $itemCount = count($request->harga);
+        foreach (['bawa', 'tambah', 'sisa_muda', 'sisa_tua', 'sedia'] as $field) {
+            if (count($request->input($field, [])) !== $itemCount) {
+                throw ValidationException::withMessages([
+                    $field => 'Jumlah baris item laporan tidak konsisten.',
+                ]);
+            }
+        }
+
         // dd($request);
 
         $sisa        = [];
@@ -907,18 +972,18 @@ class AdminHomeController extends Controller
         }
 
         if ($bw == 0) {
-            return redirect()->route('admin.update')->with(['warning' => 'Bawa & Sisa Wajib Diisi']);
+            return back()->withInput()->with(['warning' => 'Bawa & Sisa Wajib Diisi']);
         }
 
         for ($i = 0; $i < count($harga); $i++) {
             $sisa[$i] = $sisa_muda[$i] + $sisa_tua[$i];
             if ($sisa[$i] > $bawa[$i]) {
-                return redirect()->route('admin.update')->with(['warning' => 'Sisa TIdak Boleh Lebih Dari Bawa']);
+                return back()->withInput()->with(['warning' => 'Sisa Tidak Boleh Lebih Dari Bawa']);
             }
         }
 
         if ($pelunasan > $request->piutang) {
-            return redirect()->route('admin.update')->with(['warning' => 'Pelunasan Tidak Boleh Lebih Dari Piutang']);
+            return back()->withInput()->with(['warning' => 'Pelunasan Tidak Boleh Lebih Dari Piutang']);
         }
 
         for ($i = 0; $i < count($harga); $i++) {
@@ -982,96 +1047,85 @@ class AdminHomeController extends Controller
             'setoran'     => $setoran,
         ];
 
-        Laporan::where('id_laporan', $id_laporan)->update($laporan);
+        DB::transaction(function () use ($request, $id_laporan, $laporan, $harga, $bawa, $tambah, $laku, $sisa_muda, $sisa_tua, $piutang) {
+            Laporan::where('id_laporan', $id_laporan)->update($laporan);
 
-        for ($i = 0; $i < count($harga); $i++) {
-            $itemLaporan = [
-                'harga'     => $harga[$i],
-                'bawa'      => $bawa[$i],
-                'tambah'    => $tambah[$i],
-                'laku'      => $laku[$i],
-                'sisa_muda' => $sisa_muda[$i],
-                'sisa_tua'  => $sisa_tua[$i],
-            ];
-            ItemLaporan::where('id_laporan', $id_laporan)->where('harga', $harga[$i])->update($itemLaporan);
-        }
-
-        $item_monitoring = ItemMonitoring::whereDate('tgl_laporan', date('Y-m-d', strtotime($request->tgl_laporan)))
-            ->where('id_user', $request->id_user)
-            ->orderBy('harga', 'desc')
-            ->get();
-
-        // dd($item_monitoring);
-
-        for ($i = 0; $i < count($item_monitoring); $i++) {
-            $data = ItemMonitoring::where('id_item_monitoring', $item_monitoring[$i]->id_item_monitoring)
-                ->update([
-                    'sisa_muda'    => $sisa_muda[$i],
-                    'sisa_tua'     => $sisa_tua[$i],
-                    'tambah_sales' => $tambah[$i],
+            for ($i = 0; $i < count($harga); $i++) {
+                ItemLaporan::where('id_laporan', $id_laporan)->where('harga', $harga[$i])->update([
+                    'harga' => $harga[$i],
+                    'bawa' => $bawa[$i],
+                    'tambah' => $tambah[$i],
+                    'laku' => $laku[$i],
+                    'sisa_muda' => $sisa_muda[$i],
+                    'sisa_tua' => $sisa_tua[$i],
                 ]);
-        }
+            }
 
-        User::where('id', $request->id_user)->update([
-            'piutang' => $piutang,
-        ]);
+            $itemMonitoring = ItemMonitoring::whereBetween('tgl_laporan', [
+                Carbon::parse($request->tgl_laporan)->startOfDay(),
+                Carbon::parse($request->tgl_laporan)->endOfDay(),
+            ])->where('id_user', $request->id_user)
+                ->orderBy('harga', 'desc')
+                ->get();
+
+            foreach ($itemMonitoring as $index => $monitoring) {
+                ItemMonitoring::where('id_item_monitoring', $monitoring->id_item_monitoring)->update([
+                    'sisa_muda' => $sisa_muda[$index],
+                    'sisa_tua' => $sisa_tua[$index],
+                    'tambah_sales' => $tambah[$index],
+                ]);
+            }
+
+            User::where('id', $request->id_user)->update(['piutang' => $piutang]);
+        });
 
         return redirect()->route('admin.detail', $id_laporan);
     }
 
     public function status($id_laporan)
     {
-        $acc = Carbon::now();
-        DB::table('laporan')->where('id_laporan', $id_laporan)->update(['status' => '1', 'acc' => $acc]);
+        $this->authorizeReportManagement();
 
-        return redirect()->route('admin.home');
+        $updated = DB::table('laporan')
+            ->where('id_laporan', $id_laporan)
+            ->where('status', '0')
+            ->update(['status' => '1', 'acc' => Carbon::now()]);
+
+        if (! $updated && ! DB::table('laporan')->where('id_laporan', $id_laporan)->exists()) {
+            abort(404);
+        }
+
+        return redirect()->route('admin.home')->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
     public function hapus($id_laporan)
     {
+        $this->authorizeReportManagement();
 
-        // dd($id_laporan);
-        $data = DB::table('laporan')
-            ->where('id_laporan', $id_laporan)
-            ->first();
+        DB::transaction(function () use ($id_laporan) {
+            $laporan = DB::table('laporan')
+                ->where('id_laporan', $id_laporan)
+                ->lockForUpdate()
+                ->first();
 
-        // dd($data);
+            abort_if(! $laporan, 404);
 
-        $piutang = $data->piutang - $data->hutang_baru + $data->pelunasan;
-        User::where('id', $data->id_user)->update(['piutang' => $piutang]);
+            $piutang = $laporan->piutang - $laporan->hutang_baru + $laporan->pelunasan;
+            User::where('id', $laporan->id_user)->update(['piutang' => $piutang]);
 
-        // if ($data->hutang_baru) {
-        // 	$piutang = $data->piutang - $data->hutang_baru;
-        // 	User::where('id', $data->id_user)->update(['piutang' => $piutang]);
-        // }
+            ItemLaporan::where('id_laporan', $id_laporan)->delete();
+            Laporan::where('id_laporan', $id_laporan)->delete();
 
-        // if ($data->pelunasan) {
-        // 	$piutang = $data->piutang + $data->pelunasan;
-        // 	User::where('id', $data->id_user)->update(['piutang' => $piutang]);
-        // }
+            ItemMonitoring::whereBetween('tgl_laporan', [
+                Carbon::parse($laporan->tgl_laporan)->startOfDay(),
+                Carbon::parse($laporan->tgl_laporan)->endOfDay(),
+            ])->where('id_user', $laporan->id_user)->update([
+                'sisa_muda' => 0,
+                'sisa_tua' => 0,
+            ]);
+        });
 
-        Laporan::where('id_laporan', $id_laporan)->delete();
-
-        ItemLaporan::where('id_laporan', $id_laporan)->delete();
-
-        // die();
-        $item_monitoring = ItemMonitoring::whereDate('tgl_laporan', date('Y-m-d', strtotime($data->tgl_laporan)))
-            ->where('id_user', $data->id_user)
-            ->orderBy('harga', 'desc')
-            ->get();
-
-        // dd($item_monitoring);
-
-        for ($i = 0; $i < count($item_monitoring); $i++) {
-            $data = DB::table('item_monitoring')
-                ->where('id_item_monitoring', $item_monitoring[$i]->id_item_monitoring)
-                ->update([
-                    'sisa_muda' => 0,
-                    'sisa_tua'  => 0,
-                ]);
-        }
-
-        return redirect()->route('admin.home');
+        return redirect()->route('admin.home')->with('success', 'Laporan berhasil dihapus.');
     }
 
     public function filter(Request $request)
@@ -1092,10 +1146,15 @@ class AdminHomeController extends Controller
 
     public function cetakExcel(Request $request)
     {
-        $id_user = $request->id_user;
-        $id_tipe = $request->id_tipe;
-        $from    = $request->from;
-        $to      = $request->to;
+        $request->merge([
+            'id_user' => $request->id_user === 'NULL' ? null : $request->id_user,
+        ]);
+        $validated = $request->validate([
+            'id_user' => ['nullable', 'integer', 'exists:users,id'],
+            'id_tipe' => ['required', 'integer', 'exists:tipe,id_tipe'],
+            'from' => ['required', 'date_format:Y-m-d'],
+            'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
+        ]);
 
         // $q = DB::table('laporan')
         // ->join('users', 'laporan.id_user', '=', 'users.id')
@@ -1136,16 +1195,24 @@ class AdminHomeController extends Controller
         // return view('admin.laporan.cetak')->with(['laporan' => $laporan, 'item_laporan' => $item_laporan, 'harga' => $harga, 'tipe' => $tipe]);
 
         $nama_file = 'laporan_' . date('Y-m-d_H-i-s') . '.xlsx';
-        return Excel::download(new LaporanExport($id_user, $id_tipe, $from, $to), $nama_file);
+        return Excel::download(new LaporanExport(
+            $validated['id_user'] ?? null,
+            (string) $validated['id_tipe'],
+            $validated['from'],
+            $validated['to']
+        ), $nama_file);
     }
 
     public function pdf(Request $request)
     {
-        $id_laporan = $request->id_laporan;
+        $validated = $request->validate([
+            'id_laporan' => ['required', 'string', 'exists:laporan,id_laporan'],
+        ]);
+        $id_laporan = $validated['id_laporan'];
 
         $laporan = DB::table('laporan')
             ->where('id_laporan', $id_laporan)
-            ->first();
+            ->firstOrFail();
 
         $sales = DB::table('users')
             ->join('laporan', 'users.id', '=', 'laporan.id_user')
@@ -1159,8 +1226,10 @@ class AdminHomeController extends Controller
             ->select('item_laporan.*', 'laporan.jumlah_laku', 'laporan.marginsales', 'laporan.setoran', 'laporan.hutang_baru', 'laporan.pelunasan', 'laporan.piutang', 'laporan.status', 'laporan.tgl_laporan', 'laporan.acc')
             ->get();
 
+        abort_if($data->isEmpty() || $sales->isEmpty(), 404);
+
         $tgl_laporan = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('l, d F Y - H:i:s');
-        $acc         = Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s');
+        $acc         = $data[0]->acc ? Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s') : '-';
         $status      = $data[0]->status;
 
         $tgl        = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('Y-m-d');
@@ -1196,11 +1265,14 @@ class AdminHomeController extends Controller
 
     public function pdfKasir(Request $request)
     {
-        $id_laporan = $request->id_laporan;
+        $validated = $request->validate([
+            'id_laporan' => ['required', 'string', 'exists:laporan,id_laporan'],
+        ]);
+        $id_laporan = $validated['id_laporan'];
 
         $laporan = DB::table('laporan')
             ->where('id_laporan', $id_laporan)
-            ->first();
+            ->firstOrFail();
 
         $sales = DB::table('users')
             ->join('laporan', 'users.id', '=', 'laporan.id_user')
@@ -1214,8 +1286,10 @@ class AdminHomeController extends Controller
             ->select('item_laporan.*', 'laporan.jumlah_laku', 'laporan.marginsales', 'laporan.setoran', 'laporan.hutang_baru', 'laporan.pelunasan', 'laporan.piutang', 'laporan.status', 'laporan.tgl_laporan', 'laporan.acc')
             ->get();
 
+        abort_if($data->isEmpty() || $sales->isEmpty(), 404);
+
         $tgl_laporan = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('l, d F Y - H:i:s');
-        $acc         = Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s');
+        $acc         = $data[0]->acc ? Carbon::parse($data[0]->acc)->translatedFormat('l, d F Y - H:i:s') : '-';
         $status      = $data[0]->status;
 
         $tgl        = Carbon::parse($data[0]->tgl_laporan)->translatedFormat('Y-m-d');
@@ -1253,56 +1327,56 @@ class AdminHomeController extends Controller
 
     public function cetakpdf(Request $request)
     {
-        $id_user = $request->id_user;
-        $id_tipe = $request->id_tipe;
-        $from    = $request->from;
-        $to      = $request->to;
-
-        if (! $from || ! $to) {
-            return redirect()->back();
-        }
+        $validated = $request->validate([
+            'id_user' => ['nullable', 'integer', 'exists:users,id'],
+            'id_tipe' => ['nullable', 'integer', 'exists:tipe,id_tipe'],
+            'from' => ['required', 'date_format:Y-m-d'],
+            'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
+        ]);
+        $id_user = $validated['id_user'] ?? null;
+        $id_tipe = $validated['id_tipe'] ?? null;
+        $from = $validated['from'];
+        $to = $validated['to'];
 
         $q = Laporan::leftJoin('users', 'laporan.id_user', '=', 'users.id')
             ->leftJoin('tipe', 'laporan.id_tipe', '=', 'tipe.id_tipe')
             ->select('laporan.*', 'users.name', 'users.piutang', 'tipe.tipe');
 
-        if ($from) {
-            $q->whereDate('laporan.tgl_laporan', '>=', $from)
-                ->whereDate('laporan.tgl_laporan', '<=', $to);
-        } else {
-            $now   = Carbon::now();
-            $month = $now->month;
-            $q->whereMonth('laporan.tgl_laporan', '=', $month);
-        }
+        $q->whereBetween('laporan.tgl_laporan', [
+            Carbon::parse($from)->startOfDay(),
+            Carbon::parse($to)->endOfDay(),
+        ]);
 
-        if (isset($id_user)) {
+        if ($id_user) {
             $q->where('laporan.id_user', $id_user);
         }
 
-        if (isset($id_tipe)) {
+        if ($id_tipe) {
             $q->where('laporan.id_tipe', $id_tipe);
         }
 
         $data = $q->orderBy('laporan.tgl_laporan', 'asc')->get();
-        // dd($data);
+        $itemsByReport = DB::table('item_laporan')
+            ->whereIn('id_laporan', $data->pluck('id_laporan'))
+            ->get()
+            ->groupBy('id_laporan');
+        $monitoringByUserDate = DB::table('item_monitoring')
+            ->whereIn('id_user', $data->pluck('id_user')->unique())
+            ->whereBetween('tgl_laporan', [
+                Carbon::parse($from)->startOfDay(),
+                Carbon::parse($to)->endOfDay(),
+            ])
+            ->get()
+            ->groupBy(fn ($item) => $item->id_user.'|'.Carbon::parse($item->tgl_laporan)->format('Y-m-d'));
 
-        for ($i = 0; $i < count($data); $i++) {
-            $item = DB::table('item_laporan')
-                ->where('id_laporan', '=', $data[$i]->id_laporan)
-                ->get();
-            $item_laporan[$i] = $item;
-
-            $tgl = Carbon::parse($data[$i]->tgl_laporan)->translatedFormat('Y-m-d');
-
-            $item = DB::table('item_monitoring')
-                ->where('id_user', $data[$i]->id_user)
-                ->whereDate('tgl_laporan', $tgl)
-                ->get();
-            $item_monitoring[$i] = $item;
+        $item_laporan = [];
+        $item_monitoring = [];
+        foreach ($data as $index => $laporan) {
+            $item_laporan[$index] = $itemsByReport->get($laporan->id_laporan, collect());
+            $monitoringKey = $laporan->id_user.'|'.Carbon::parse($laporan->tgl_laporan)->format('Y-m-d');
+            $item_monitoring[$index] = $monitoringByUserDate->get($monitoringKey, collect());
         }
 
-        // dd($data);
-        // return view('admin.laporan.cetakpdf', ['data' => $data, 'item_laporan' => $item_laporan, 'item_monitoring' => $item_monitoring]);
         $pdf = PDF::loadview('admin.laporan.cetakpdf', ['data' => $data, 'item_laporan' => $item_laporan, 'item_monitoring' => $item_monitoring]);
         return $pdf->stream();
     }

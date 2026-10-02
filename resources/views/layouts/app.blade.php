@@ -203,7 +203,28 @@
 
     <script>
         $(document).ready(function() {
-            $('#table_id').DataTable();
+            $('#table_id').DataTable({
+                language: {
+                    emptyTable: 'Tidak ada data pada periode atau filter yang dipilih',
+                    info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
+                    infoEmpty: 'Tidak ada data yang ditampilkan',
+                    infoFiltered: '(disaring dari _MAX_ data)',
+                    lengthMenu: 'Tampilkan _MENU_ data',
+                    loadingRecords: 'Memuat data…',
+                    processing: 'Memproses data…',
+                    search: 'Cari:',
+                    zeroRecords: 'Data yang dicari tidak ditemukan',
+                    paginate: {
+                        first: 'Pertama',
+                        last: 'Terakhir',
+                        next: 'Berikutnya',
+                        previous: 'Sebelumnya'
+                    }
+                },
+                columnDefs: [
+                    { orderable: false, targets: -1 }
+                ]
+            });
         });
     </script>
 

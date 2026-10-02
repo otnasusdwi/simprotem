@@ -331,6 +331,20 @@ a:focus {
     border-color: var(--simprotem-green);
 }
 
+.btn-simprotem-outline {
+    color: var(--simprotem-green);
+    background: #fff;
+    border-color: var(--simprotem-green-muted);
+}
+
+.btn-simprotem-outline:hover,
+.btn-simprotem-outline:focus,
+.btn-simprotem-outline:not(:disabled):not(.disabled):active {
+    color: #fff;
+    background: var(--simprotem-green);
+    border-color: var(--simprotem-green);
+}
+
 .btn-danger {
     color: #fff;
     background: var(--simprotem-danger);
@@ -379,6 +393,56 @@ a:focus {
     margin-bottom: .5rem !important;
     font-size: 13.5px;
     font-weight: 600;
+}
+
+.filter-select-wrap {
+    position: relative;
+}
+
+.filter-select-wrap .form-control {
+    padding-right: 42px;
+}
+
+.filter-select-loader {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: opacity .15s ease;
+}
+
+.filter-select-wrap.is-loading .filter-select-loader {
+    opacity: 1;
+}
+
+.filter-select-wrap.is-loading {
+    pointer-events: none;
+}
+
+.filter-select-wrap.is-loading .form-control {
+    color: #789087;
+    background-image: none;
+    cursor: wait;
+}
+
+.filter-select-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(7, 91, 67, .2);
+    border-top-color: var(--simprotem-green);
+    border-radius: 50%;
+    animation: simprotem-select-spin .65s linear infinite;
+}
+
+@keyframes simprotem-select-spin {
+    to { transform: rotate(360deg); }
 }
 
 .table {
@@ -644,6 +708,16 @@ a:focus {
 .dataTables_wrapper td .dropdown-item:focus {
     color: var(--simprotem-green-dark);
     background: var(--simprotem-green-soft);
+}
+
+.dataTables_wrapper td .dropdown-item.text-danger {
+    color: var(--simprotem-danger) !important;
+}
+
+.dataTables_wrapper td .dropdown-item.text-danger:hover,
+.dataTables_wrapper td .dropdown-item.text-danger:focus {
+    color: var(--simprotem-danger-dark) !important;
+    background: rgba(200, 63, 73, .08);
 }
 
 @media (max-width: 767.98px) {

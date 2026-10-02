@@ -24,7 +24,7 @@
 </head>
 <body>
     @php
-        $hutang = $total_pelunasan = $total_hutang =  0;
+        $hutang = $piutang = $total_pelunasan = $total_hutang = 0;
     @endphp
     @foreach($data as $index => $row)
     @php
@@ -82,7 +82,7 @@
                 </td>
                 <td> = </td>
                 <td style="color: black; font-weight: bold;">
-                    {{ number_format($item_monitoring[$index][$i]->sedia,0,',','.') }}
+                    {{ number_format(optional($item_monitoring[$index]->get($i))->sedia ?? 0,0,',','.') }}
                 </td>
                 <td>  </td>
                 <td style="color: black; font-weight: bold;">
