@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
-use App\Models\Tipe;
 use DB;
-use Auth;
 
 
 class AdminUserController extends Controller
@@ -68,50 +69,44 @@ class AdminUserController extends Controller
 	*/
 	public function storesales(Request $request)
 	{
-		$name = $request->name;
-		$password = $request->password;
-		$tipe = $request->tipe;
-		
-		$data = DB::table('users')
-		->where('name', $name)
-		->first();
-		
-		if ($data) {
-			return redirect()->route('admin.create_sales')->with(['warning' => 'Nama Sudah Digunakan']);
-		}else{
-			$sales = new User;
-			$sales->name = $name;
-			$sales->password = Hash::make($password);
-			$sales->tipe = $tipe;
-			$sales->role = 'sales';
-			$sales->save();
-			
-			return redirect()->route('admin.sales')->with(['success' => 'Data Sales Berhasil Ditambahkan']);
-		}	
+		$request->merge(['username' => Str::lower(trim((string) $request->username))]);
+		$validated = $request->validate([
+			'name' => ['required', 'string', 'max:255'],
+			'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', 'unique:users,username'],
+			'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+			'tipe' => ['required', 'exists:tipe,id_tipe'],
+		]);
+
+		$sales = new User;
+		$sales->name = $validated['name'];
+		$sales->username = $validated['username'];
+		$sales->password = Hash::make($validated['password']);
+		$sales->tipe = $validated['tipe'];
+		$sales->role = 'sales';
+		$sales->save();
+
+		return redirect()->route('admin.sales')->with(['success' => 'Data Sales Berhasil Ditambahkan']);
 	}
 	
 	public function storeadmin(Request $request)
 	{
-		$name = $request->name;
-		$password = $request->password;
-		$level = $request->level;
-		
-		$data = DB::table('users')
-		->where('name', $name)
-		->first();
-		
-		if ($data) {
-			return redirect()->route('admin.create_admin')->with(['warning' => 'Nama Sudah Digunakan']);
-		}else{
-			$sales = new User;
-			$sales->name = $name;
-			$sales->password = Hash::make($password);
-			$sales->role = 'admin';
-			$sales->level = $level;
-			$sales->save();
-			
-			return redirect()->route('admin.admin')->with(['success' => 'Data Admin Berhasil Ditambahkan']);
-		}	
+		$request->merge(['username' => Str::lower(trim((string) $request->username))]);
+		$validated = $request->validate([
+			'name' => ['required', 'string', 'max:255'],
+			'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', 'unique:users,username'],
+			'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+			'level' => ['required', Rule::in(['1', '2', '3'])],
+		]);
+
+		$admin = new User;
+		$admin->name = $validated['name'];
+		$admin->username = $validated['username'];
+		$admin->password = Hash::make($validated['password']);
+		$admin->role = 'admin';
+		$admin->level = $validated['level'];
+		$admin->save();
+
+		return redirect()->route('admin.admin')->with(['success' => 'Data Admin Berhasil Ditambahkan']);
 	}
 	/**
 	* Display the specified resource.
@@ -167,8 +162,12 @@ class AdminUserController extends Controller
 	
 	public function updatepassword(Request $request)
 	{
-		$id = $request->id;
-		$password = Hash::make($request->password);
+		$validated = $request->validate([
+			'id' => ['required', 'integer', 'exists:users,id'],
+			'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+		]);
+		$id = $validated['id'];
+		$password = Hash::make($validated['password']);
 
 		User::where('id', $id)->update(['password' => $password]);
 
@@ -189,33 +188,23 @@ class AdminUserController extends Controller
 	*/
 	public function updatesales(Request $request)
 	{
-		$id = $request->id;
-		$name = $request->name;
-		$tipe = $request->tipe;
-		$piutang = $request->piutang;
+		$request->merge(['username' => Str::lower(trim((string) $request->username))]);
+		$validated = $request->validate([
+			'id' => ['required', 'integer', 'exists:users,id'],
+			'name' => ['required', 'string', 'max:255'],
+			'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($request->id)],
+			'tipe' => ['required', 'exists:tipe,id_tipe'],
+			'piutang' => ['required', 'numeric', 'min:0'],
+		]);
 
-		$user = User::where('id', $id)->first();
-		
-		if ($name == $user->name) {
-			User::where('id', $id)->update([
-				'tipe' => $tipe,
-				'piutang' => $piutang
-			]);
+		User::where('id', $validated['id'])->update([
+			'name' => $validated['name'],
+			'username' => $validated['username'],
+			'tipe' => $validated['tipe'],
+			'piutang' => $validated['piutang'],
+		]);
 
 			return redirect()->route('admin.sales')->with(['success' => 'Data Sales Berhasil Diupdate']);
-		}else{
-			$cek = User::where('name', $name)->first();
-			if ($cek) {
-				return redirect()->route('admin.sales')->with(['warning' => 'Name Sales Sudah Ada']);
-			}else{
-				User::where('id', $id)->update([
-					'name' => $name,
-					'tipe' => $tipe,
-					'piutang' => $piutang
-				]);
-				return redirect()->route('admin.sales')->with(['success' => 'Data Sales Berhasil Diupdate']);
-			}
-		}
 		// dd($id);
 
 		
@@ -239,13 +228,19 @@ class AdminUserController extends Controller
 	
 	public function updateadmin(Request $request)
 	{
-		$id = $request->id;
-		$name = $request->name;
-		$level = $request->level;
+		$request->merge(['username' => Str::lower(trim((string) $request->username))]);
+		$validated = $request->validate([
+			'id' => ['required', 'integer', 'exists:users,id'],
+			'name' => ['required', 'string', 'max:255'],
+			'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($request->id)],
+			'level' => ['required', Rule::in(['1', '2', '3'])],
+		]);
 
-		// dd($level);
-		
-		DB::table('users')->where('id', $id)->update(['name' => $name, 'level' => $level]);
+		DB::table('users')->where('id', $validated['id'])->update([
+			'name' => $validated['name'],
+			'username' => $validated['username'],
+			'level' => $validated['level'],
+		]);
 		return redirect()->route('admin.admin')->with(['success' => 'Data Admin Berhasil Diupdate']);
 		
 	}

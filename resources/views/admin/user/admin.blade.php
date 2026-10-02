@@ -63,6 +63,9 @@
                                                             <h6 class="mb-1"><b>Nama</b></h6>
                                                         </th>
                                                         <th>
+                                                            <h6 class="mb-1"><b>Username</b></h6>
+                                                        </th>
+                                                        <th>
                                                             <h6 class="mb-1"><b>Aksi</b></h6>
                                                         </th>
                                                     </tr>
@@ -82,6 +85,9 @@
                                                             @else
                                                             ( Owner )
                                                             @endif
+                                                        </td>
+                                                        <td>
+                                                            <h6 class="mb-1">{{$row->username}}</h6>
                                                         </td>
                                                         <td>
                                                             <div class="dropdown">

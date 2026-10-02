@@ -41,13 +41,28 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Nama Sales</label>
-                                                        <input type="text" class="form-control" placeholder="Name Sales" name="name" required>
+                                                        <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Nama Sales" name="name" value="{{ old('name') }}" required>
+                                                        @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Username</label>
+                                                        <input type="text" class="form-control @error('username') is-invalid @enderror" placeholder="contoh: budi.santoso" name="username" value="{{ old('username') }}" autocomplete="off" required>
+                                                        @error('username') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Password</label>
-                                                        <input type="password" class="form-control" placeholder="Password" name="password" required>
+                                                        <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Minimal 8 karakter, huruf dan angka" name="password" autocomplete="new-password" required>
+                                                        @error('password') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Konfirmasi Password</label>
+                                                        <input type="password" class="form-control" placeholder="Ulangi password" name="password_confirmation" autocomplete="new-password" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">

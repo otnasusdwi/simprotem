@@ -44,11 +44,18 @@
                                                         <label>Password Baru</label>
                                                         <div class="input-group" id="show_hide_password">
                                                             
-                                                            <input class="form-control" type="password" name="password" required>
+                                                            <input class="form-control @error('password') is-invalid @enderror" type="password" name="password" placeholder="Minimal 8 karakter, huruf dan angka" autocomplete="new-password" required>
                                                             <div class="input-group-addon">
                                                                 <a href=""><i class="fa fa-eye-slash" aria-hidden="true" style="padding-top: 15px;padding-right: 10px;padding-left: 10px;"></i></a>
                                                             </div>
                                                         </div>
+                                                        @error('password') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Konfirmasi Password Baru</label>
+                                                        <input class="form-control" type="password" name="password_confirmation" placeholder="Ulangi password baru" autocomplete="new-password" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">

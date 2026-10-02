@@ -362,7 +362,7 @@
                     @csrf
                     <span class="eyebrow">Area pengguna</span>
                     <h1>Selamat datang</h1>
-                    <p class="login-description">Masukkan nama pengguna dan password untuk melanjutkan ke dashboard.</p>
+                    <p class="login-description">Masukkan username dan password untuk melanjutkan ke dashboard.</p>
 
                     @if ($message = Session::get('warning'))
                         <div class="alert alert-warning" role="alert">
@@ -371,14 +371,14 @@
                     @endif
 
                     <div class="form-group">
-                        <label class="form-label" for="name">Nama pengguna</label>
+                        <label class="form-label" for="username">Username</label>
                         <div class="field-wrap">
                             <i class="fas fa-user" aria-hidden="true"></i>
-                            <input id="name" type="text" name="name"
-                                class="form-control @error('name') is-invalid @enderror"
-                                value="{{ old('name') }}" placeholder="Masukkan nama pengguna" autocomplete="username" autofocus required>
+                            <input id="username" type="text" name="username"
+                                class="form-control @error('username') is-invalid @enderror"
+                                value="{{ old('username') }}" placeholder="Masukkan username" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus required>
                         </div>
-                        @error('name')
+                        @error('username')
                             <span class="invalid-feedback" role="alert">{{ $message }}</span>
                         @enderror
                     </div>

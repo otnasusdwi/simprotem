@@ -42,8 +42,16 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Nama Sales</label>
-                                                        <input type="text" class="form-control" placeholder="Tipe Sales" name="name" value="{{ $data->name }}" required>
+                                                        <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Nama Sales" name="name" value="{{ old('name', $data->name) }}" required>
+                                                        @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                                         
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Username</label>
+                                                        <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username', $data->username) }}" autocomplete="off" required>
+                                                        @error('username') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">

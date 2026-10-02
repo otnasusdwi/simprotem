@@ -41,10 +41,18 @@
 												<div class="col-md-6">
 													<div class="form-group">
 														<label>Nama Admin</label>
-														<input type="text" class="form-control" placeholder="Nama Admin" name="name" value="{{ $data->name }}" required>
-														<input type="hidden" name="id" value="{{ $data->id }}">
-													</div>
-												</div>
+                                                            <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Nama Admin" name="name" value="{{ old('name', $data->name) }}" required>
+                                                            @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                                            <input type="hidden" name="id" value="{{ $data->id }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Username</label>
+                                                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username', $data->username) }}" autocomplete="off" required>
+                                                            @error('username') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                                        </div>
+                                                    </div>
 												<div class="col-md-6">
 													<div class="form-group">
 														<label>Level</label>

@@ -60,7 +60,10 @@
                                                         </th> 
                                                         <th>
                                                             <h6 class="mb-1"><b>Nama</b></h6>
-                                                        </th>   
+                                                        </th>
+                                                        <th>
+                                                            <h6 class="mb-1"><b>Username</b></h6>
+                                                        </th>
                                                         <th>
                                                             <h6 class="mb-1"><b>Tipe</b></h6>
                                                         </th> 
@@ -80,7 +83,10 @@
                                                         </td> 
                                                         <td>
                                                             <h6 class="mb-1">{{$row->name}}</h6>
-                                                        </td>  
+                                                        </td>
+                                                        <td>
+                                                            <h6 class="mb-1">{{$row->username}}</h6>
+                                                        </td>
                                                         <td>
                                                             <h6 class="mb-1">{{$row->tipe}}</h6>
                                                         </td> 

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -40,16 +42,29 @@ class LoginController extends Controller
     }
 
     public function login(Request $request)
-    {   
-        $input = $request->all();
-
-        $this->validate($request, [
-            'name' => 'required',
-            'password' => 'required',
+    {
+        $request->merge([
+            'username' => Str::lower(trim((string) $request->input('username'))),
         ]);
 
-        if(auth()->attempt(array('name' => $input['name'], 'password' => $input['password'])))
-        {
+        $credentials = $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $throttleKey = Str::transliterate($credentials['username'].'|'.$request->ip());
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return back()
+                ->withInput($request->only('username'))
+                ->with('warning', "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik.");
+        }
+
+        if (auth()->attempt($credentials)) {
+            RateLimiter::clear($throttleKey);
+
             if (auth()->user()->role == 'admin') {
                 if (auth()->user()->level == '1') {
                     return redirect()->route('admin.home');
@@ -59,9 +74,12 @@ class LoginController extends Controller
             }else{
                 return redirect()->route('sales.home');
             }
-        }else{
-            return redirect()->route('login')->with('warning','Nama dan Password Salah!');
-        }
+        } else {
+            RateLimiter::hit($throttleKey, 60);
 
+            return back()
+                ->withInput($request->only('username'))
+                ->with('warning', 'Username atau password salah.');
+        }
     }
 }
