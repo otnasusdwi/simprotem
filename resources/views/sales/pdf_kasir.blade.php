@@ -55,7 +55,7 @@
 </head>
 
 <body class="text-center">
-	<img src="{{ asset('images/favicon.ico') }}" alt="" width="60">
+	<img src="{{ asset('images/simprotem.png') }}" alt="Simprotem" width="60">
 	<br>
 	{{-- <h2>
 		<strong>Laporan Tempe Superdangsul</strong>

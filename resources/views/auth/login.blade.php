@@ -14,7 +14,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <!-- Favicon icon -->
-        <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+        <link rel="icon" href="{{ asset('images/simprotem.png') }}" type="image/png">
         <!-- fontawesome icon -->
         <link rel="stylesheet" href="{{ asset('fonts/fontawesome/css/fontawesome-all.min.css') }}">
         <!-- animation css -->
@@ -39,7 +39,7 @@
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
                             <div class="mb-4">
-                                <img src="images/logo.png" alt="">
+                                <img src="{{ asset('images/simprotem.png') }}" alt="Simprotem" width="128">
                             </div>
                             <h3 class="mb-4">Login</h3>
                             @if ($message = Session::get('warning'))

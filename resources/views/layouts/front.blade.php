@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <!-- Favicon icon -->
-    <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/simprotem.png') }}" type="image/png">
     <!-- fontawesome icon -->
     <link rel="stylesheet" href="{{ asset('fonts/fontawesome/css/fontawesome-all.min.css') }}">
     <!-- animation css -->
@@ -87,7 +87,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right profile-notification">
                             <div class="pro-head">
-                                <img src="{{ asset('images/logo.png') }}">
+                                <img src="{{ asset('images/simprotem.png') }}">
                                 <span>{{ Auth::user()->name }}</span>                            
                             </div>
                             <ul class="pro-body">
